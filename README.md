@@ -1,1 +1,1 @@
-# hands-cv-unipd
+# Human hands detection and segmentation
