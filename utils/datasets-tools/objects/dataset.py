@@ -192,7 +192,6 @@ class Dataset:
 
         out_path = pathlib.Path(
             output_path.parents[0], (output_path.name + '_normalized'), ('img_' + str(i).zfill(5) + '.txt'))
-        print(out_path)
         pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
 
         with open(out_path, 'w') as f:
@@ -202,3 +201,28 @@ class Dataset:
             content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
 
           f.write(content)
+
+  def generate_hand(self, output_path):
+    for i in range(len(self.images)):
+      image = cv2.imread(str(self.images[i]))
+
+      for j in range(len(self.boxes[i])):
+        box = self.boxes[i][j]
+        x, y, w, h = box
+
+        cropped = image[y:y+h, x:x+w]
+
+        out_path = output_path.joinpath(
+            'images', 'img_' + str(i).zfill(5) + '_' + str(j).zfill(2) + '.jpg')
+        pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+
+        cv2.imwrite(str(out_path), cropped)
+
+        mask = cv2.imread(str(self.splitted_masks[i][j]))
+        cropped_mask = mask[y:y+h, x:x+w]
+
+        out_path = output_path.joinpath(
+            'masks', 'img_' + str(i).zfill(5) + '_' + str(j).zfill(2) + '.png')
+        pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+
+        cv2.imwrite(str(out_path), cropped_mask)

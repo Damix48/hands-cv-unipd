@@ -77,6 +77,7 @@ print(len(dataset.masks))
 dataset.generate_images(pathlib.Path(output_path, 'images'))
 dataset.generate_masks(pathlib.Path(output_path, 'masks'), merge=True)
 dataset.generate_boxes(pathlib.Path(output_path, 'boxes'), normalize=True)
+dataset.generate_hand(pathlib.Path(output_path, 'hand'))
 
 print(len(dataset.splitted_masks))
 print(len(dataset.merged_masks))
