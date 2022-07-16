@@ -63,6 +63,15 @@ class Dataset:
     images_folder = pathlib.Path(dataset_path, 'images_original_size')
     metadata_path = pathlib.Path(dataset_path, 'annotations')
 
+    self.load_from_xml_annotation(images_folder, metadata_path, skip_images)
+
+  def load_gtea_gaze_plus(self, dataset_path, skip_images=[]):
+    images_folder = pathlib.Path(dataset_path, 'Images')
+    metadata_path = pathlib.Path(dataset_path, 'Annotations')
+
+    self.load_from_xml_annotation(images_folder, metadata_path, skip_images)
+
+  def load_from_xml_annotation(self, images_folder, annotations_folder, skip_images=[]):
     images_paths = list(images_folder.glob('**/*.jpg'))
     images_paths.sort()
 
@@ -70,7 +79,7 @@ class Dataset:
       if(image_path.stem not in skip_images):
         self.images.append(image_path)
 
-    masks_paths = list(metadata_path.glob('**/*.xml'))
+    masks_paths = list(annotations_folder.glob('**/*.xml'))
     masks_paths.sort()
 
     for mask_path in masks_paths:

@@ -9,6 +9,8 @@ cli_parser.add_argument('--ego', '--egohands-path',
                         action='store', help="Path to the EgoHands dataset folder")
 cli_parser.add_argument('--hof', '--hand-over-faces-path',
                         action='store', help="Path to the HandOverFaces folder")
+cli_parser.add_argument('--gtea', '--gtea-gaze-plus-path',
+                        action='store', help="Path to the GTEA Gaze+ folder")
 cli_parser.add_argument('-o', '--output',
                         action='store', help="Path to the output folder")
 # cli_parser.add_argument('-v', '--verbose', action='store_true')
@@ -19,12 +21,13 @@ def get_arguments():
 
   egohands_path = args.ego
   hand_over_faces_path = args.hof
+  gtea_gaze_plus_path = args.gtea
   output_path = args.output
 
-  return egohands_path, hand_over_faces_path, output_path
+  return egohands_path, hand_over_faces_path, gtea_gaze_plus_path, output_path
 
 
-egohands_path, hand_over_faces_path, output_path = get_arguments()
+egohands_path, hand_over_faces_path, gtea_gaze_plus_path, output_path = get_arguments()
 
 dataset = Dataset(output_path)
 
@@ -67,9 +70,10 @@ hand_over_face_skip = [
     "221"  # GIF
 ]
 
-dataset.load_egohands(egohands_path, skip_images=egohands_skip)
+# dataset.load_egohands(egohands_path, skip_images=egohands_skip)
 dataset.load_hand_over_face(
     hand_over_faces_path, skip_images=hand_over_face_skip)
+dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
 
 print(len(dataset.images))
 print(len(dataset.masks))
@@ -77,7 +81,7 @@ print(len(dataset.masks))
 dataset.generate_images(pathlib.Path(output_path, 'images'))
 dataset.generate_masks(pathlib.Path(output_path, 'masks'), merge=True)
 dataset.generate_boxes(pathlib.Path(output_path, 'boxes'), normalize=True)
-dataset.generate_hand(pathlib.Path(output_path, 'hand'))
+# dataset.generate_hand(pathlib.Path(output_path, 'hand'))
 
 print(len(dataset.splitted_masks))
 print(len(dataset.merged_masks))
