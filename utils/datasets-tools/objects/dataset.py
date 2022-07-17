@@ -7,9 +7,7 @@ import xml.etree.ElementTree as ET
 
 
 class Dataset:
-  def __init__(self, _path) -> None:
-    self.path = pathlib.Path(_path)
-
+  def __init__(self) -> None:
     self.images = []
     self.masks = []
     self.boxes = []
@@ -17,6 +15,7 @@ class Dataset:
     self.splitted_masks = []
     self.merged_masks = []
     self.normalized_boxes = []
+    self.normalized_boxes_paths = []
 
   def load_egohands(self, dataset_path, skip_images=[]):
     images_folder = pathlib.Path(dataset_path, '_LABELLED_SAMPLES')
@@ -210,6 +209,8 @@ class Dataset:
             content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
 
           f.write(content)
+
+        self.normalized_boxes_paths.append(out_path)
 
   def generate_hand(self, output_path):
     for i in range(len(self.images)):

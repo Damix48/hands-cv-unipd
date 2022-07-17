@@ -1,6 +1,8 @@
 import argparse
 import pathlib
 from objects.dataset import Dataset
+from yolo import create_yolo_dataset
+
 
 cli_parser = argparse.ArgumentParser(
     description='EgoHands and HandOverFaces parser')
@@ -29,7 +31,7 @@ def get_arguments():
 
 egohands_path, hand_over_faces_path, gtea_gaze_plus_path, output_path = get_arguments()
 
-dataset = Dataset(output_path)
+dataset = Dataset()
 
 egohands_skip = [
     "CARDS_LIVINGROOM_B_T/frame_0504",
@@ -70,20 +72,9 @@ hand_over_face_skip = [
     "221"  # GIF
 ]
 
-# dataset.load_egohands(egohands_path, skip_images=egohands_skip)
+dataset.load_egohands(egohands_path, skip_images=egohands_skip)
 dataset.load_hand_over_face(
     hand_over_faces_path, skip_images=hand_over_face_skip)
 dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
 
-print(len(dataset.images))
-print(len(dataset.masks))
-
-dataset.generate_images(pathlib.Path(output_path, 'images'))
-dataset.generate_masks(pathlib.Path(output_path, 'masks'), merge=True)
-dataset.generate_boxes(pathlib.Path(output_path, 'boxes'), normalize=True)
-# dataset.generate_hand(pathlib.Path(output_path, 'hand'))
-
-print(len(dataset.splitted_masks))
-print(len(dataset.merged_masks))
-print(len(dataset.boxes))
-print(len(dataset.normalized_boxes))
+create_yolo_dataset(dataset, '../yolo')
