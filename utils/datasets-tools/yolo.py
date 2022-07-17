@@ -4,6 +4,8 @@ import shutil
 import tempfile
 import cv2
 import argparse
+
+from pyparsing import line_start
 from objects.dataset import Dataset
 
 
@@ -13,7 +15,7 @@ def create_yolo_dataset(dataset: Dataset, output_path, black_white_ratio=0):
   dataset.generate_images(pathlib.Path(temp_folder.name, 'images'))
   dataset.generate_masks(pathlib.Path(temp_folder.name, 'masks'))
   dataset.generate_boxes(pathlib.Path(
-      temp_folder.name, 'boxes'), normalize=True)
+      temp_folder.name, 'boxes'), normalize=True, line_start="0")
 
   files = list(zip(dataset.images, dataset.normalized_boxes_paths))
 
@@ -128,10 +130,10 @@ if __name__ == "__main__":
       "221"  # GIF
   ]
 
-  # dataset.load_egohands(egohands_path, skip_images=egohands_skip)
+  dataset.load_egohands(egohands_path, skip_images=egohands_skip)
   dataset.load_hand_over_face(
       hand_over_faces_path, skip_images=hand_over_face_skip)
-  # dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
+  dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
 
   create_yolo_dataset(dataset, output_path,
                       black_white_ratio=black_white_ratio)

@@ -156,7 +156,7 @@ class Dataset:
 
         self.merged_masks.append(out_path)
 
-  def generate_boxes(self, output_path, normalize=False):
+  def generate_boxes(self, output_path, normalize=False, line_start=None):
     for i in range(len(self.splitted_masks)):
       boxes = []
 
@@ -191,7 +191,11 @@ class Dataset:
         content = ''
 
         for box in self.boxes[i]:
-          content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
+          if(line_start != None):
+            content = content + line_start + '\t' + \
+                ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
+          else:
+            content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
 
         f.write(content)
 
