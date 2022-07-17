@@ -210,7 +210,11 @@ class Dataset:
           content = ''
 
           for box in self.normalized_boxes[i]:
-            content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
+            if(line_start != None):
+              content = content + line_start + '\t' + \
+                  ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
+            else:
+              content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
 
           f.write(content)
 
