@@ -6,12 +6,12 @@
 #include "normalized_box.h"
 
 class Hand {
+  NormalizedBox box;
   cv::Mat mask;
 
  public:
-  NormalizedBox box;
   Hand(NormalizedBox box_);
-  void prova();
+  NormalizedBox getBox() const;
 };
 
 #endif  // HAND_H

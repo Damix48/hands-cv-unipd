@@ -32,7 +32,7 @@ void Image::addHand(Hand hand) {
 cv::Mat Image::getDetected() const {
   cv::Mat temp(data);
   for (Hand hand : hands) {
-    cv::rectangle(temp, hand.box.toRect(data.size()), cv::Scalar(255, 0, 0));
+    cv::rectangle(temp, hand.getBox().toRect(data.size()), cv::Scalar(255, 0, 0));
   }
 
   return temp;
