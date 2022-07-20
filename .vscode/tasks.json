@@ -1,0 +1,39 @@
+{
+  "tasks": [
+    {
+      "label": "Run make for debug",
+      "type": "shell",
+      "command": [
+        "rm -r ${fileDirname}/debug",
+        ";",
+        "mkdir ${fileDirname}/debug",
+        "&&",
+        "cd ${fileDirname}/debug",
+        "&&",
+        "cmake -DCMAKE_BUILD_TYPE=Debug ${fileDirname}",
+        "&&",
+        "make"
+      ],
+    },
+    {
+      "label": "Run make for build",
+      "type": "shell",
+      "command": [
+        "rm -r ${fileDirname}/build",
+        ";",
+        "mkdir ${fileDirname}/build",
+        "&&",
+        "cd ${fileDirname}/build",
+        "&&",
+        "cmake ${fileDirname}",
+        "&&",
+        "make"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+    },
+  ],
+  "version": "2.0.0"
+}

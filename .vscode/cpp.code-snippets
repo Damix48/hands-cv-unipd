@@ -1,0 +1,13 @@
+{
+  "Pixel for": {
+    "prefix": "pixelfor",
+    "body": [
+      "for (int i = 0; i < $1.rows; i++) {",
+      "  for (int j = 0; j < $1.cols; j++) {",
+      "    $2",
+      "  }",
+      "}"
+    ],
+    "description": "Generate for loop for pixels"
+  }
+}
