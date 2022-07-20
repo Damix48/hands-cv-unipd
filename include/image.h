@@ -2,6 +2,7 @@
 #define IMAGE_H
 
 #include <opencv2/core.hpp>
+#include <string>
 #include <vector>
 
 #include "hand.h"
@@ -12,12 +13,16 @@ class Image {
 
  public:
   Image(cv::Mat src);
+  Image(std::string path);
 
   const cv::Mat getImageBlob(cv::Size size) const;
 
+  void addHand(Hand hand);
+
+  cv::Mat getDetected() const;
+
   cv::Size size() const;
 
-  void setHands(std::vector<Hand> hands);
   std::vector<Hand>& getHands();
 };
 

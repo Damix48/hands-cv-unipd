@@ -3,11 +3,15 @@
 
 #include <opencv2/core.hpp>
 
+#include "normalized_box.h"
+
 class Hand {
-  cv::Rect box;
+  cv::Mat mask;
 
  public:
-  Hand();
+  NormalizedBox box;
+  Hand(NormalizedBox box_);
+  void prova();
 };
 
 #endif  // HAND_H

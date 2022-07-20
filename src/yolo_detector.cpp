@@ -1,9 +1,11 @@
 #include "yolo_detector.h"
 
+#include <iostream>
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 #include <string>
 
+#include "hand.h"
 #include "image.h"
 #include "normalized_box.h"
 
@@ -26,6 +28,7 @@ void YoloDetector::detect(Image& img) {
   cv::Mat output = cv::Mat(results[0].size[1], results[0].size[2], CV_32F, results[0].ptr<float>());
 
   std::vector<cv::Rect> boxes;
+  std::vector<NormalizedBox> normalizedBoxes;
   std::vector<int> indices;
   std::vector<float> scores;
 
@@ -35,13 +38,32 @@ void YoloDetector::detect(Image& img) {
     float w_ = output.at<float>(i, 2);  // width
     float h_ = output.at<float>(i, 3);  // height
     float score = output.at<float>(i, 4);
+    try {
+      NormalizedBox box = NormalizedBox::fromYolo(x_, y_, w_, h_, inputSize);
 
-    NormalizedBox box = NormalizedBox::fromYolo(x_, y_, w_, h_, inputSize);
+      boxes.push_back(box.toRect(img.size()));
+      scores.push_back(score);
 
-    boxes.push_back(box.toRect(img.size()));
+      normalizedBoxes.push_back(box);
+
+    } catch (const std::exception& e) {
+      // std::cerr << e.what() << '\n';
+
+      NormalizedBox box = NormalizedBox(0, 0, 0, 0);
+
+      boxes.push_back(box.toRect(img.size()));
+      scores.push_back(0);
+
+      normalizedBoxes.push_back(box);
+    }
+
     indices.push_back(i);
-    scores.push_back(score);
   }
 
   cv::dnn::NMSBoxes(boxes, scores, 0.1, 0.2, indices);
+
+  for (int index : indices) {
+    Hand hand(normalizedBoxes[index]);
+    img.addHand(hand);
+  }
 }
