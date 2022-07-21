@@ -5,7 +5,6 @@ import tempfile
 import cv2
 import argparse
 
-from pyparsing import line_start
 from objects.dataset import Dataset
 
 
@@ -64,6 +63,8 @@ cli_parser.add_argument('--hof', '--hand-over-faces-path',
                         action='store', help="Path to the HandOverFaces folder")
 cli_parser.add_argument('--gtea', '--gtea-gaze-plus-path',
                         action='store', help="Path to the GTEA Gaze+ folder")
+cli_parser.add_argument('--sakher', '--hand-over-faces-sakher-path',
+                        action='store', help="Path to the HandOverFaces By Sakher folder")
 cli_parser.add_argument('--bw', '--black-white-ratio',
                         action='store', help="Ratio from 0-1 for black and white images", type=float, default=0)
 cli_parser.add_argument('-o', '--output',
@@ -78,16 +79,17 @@ def get_arguments():
   hand_over_faces_path = args.hof
   gtea_gaze_plus_path = args.gtea
   black_white_ratio = args.bw
+  hand_over_faces_sakher_path = args.sakher
   output_path = args.output
 
-  return egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, output_path
+  return egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, output_path
 
 
 if __name__ == "__main__":
-  egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, output_path = get_arguments()
+  egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, output_path = get_arguments()
 
   print(egohands_path, hand_over_faces_path,
-        gtea_gaze_plus_path, black_white_ratio, output_path)
+        gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, output_path)
 
   dataset = Dataset()
 
@@ -134,6 +136,9 @@ if __name__ == "__main__":
   dataset.load_hand_over_face(
       hand_over_faces_path, skip_images=hand_over_face_skip)
   dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
+  dataset.load_hof_sakher(hand_over_faces_sakher_path)
+
+  print(dataset.images)
 
   create_yolo_dataset(dataset, output_path,
                       black_white_ratio=black_white_ratio)

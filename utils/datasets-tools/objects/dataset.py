@@ -1,5 +1,6 @@
 import pathlib
 import shutil
+from cv2 import THRESH_BINARY
 import scipy.io
 import numpy as np
 import cv2
@@ -100,6 +101,51 @@ class Dataset:
           hand = hand.reshape((-1, 1, 2))
 
           masks.append(hand)
+
+        self.masks.append(masks)
+
+  def load_hof_sakher(self, dataset_path, skip_images=[]):
+    images_folder = pathlib.Path(dataset_path, 'RGB')
+    metadata_path = pathlib.Path(dataset_path, 'Mask_Left_Right')
+
+    images_paths = list(images_folder.glob('**/*.jpg'))
+    images_paths.sort()
+
+    for image_path in images_paths:
+      if(image_path.stem not in skip_images):
+        self.images.append(image_path)
+
+    masks_paths = list(metadata_path.glob('**/*.png'))
+    masks_paths.sort()
+
+    for mask_path in masks_paths:
+      if (mask_path.stem not in skip_images):
+        masks_img = cv2.imread(str(mask_path))
+        mask_left = cv2.inRange(masks_img, (0, 128, 0), (0, 128, 0))
+        mask_right = cv2.inRange(masks_img, (0, 0, 128), (0, 0, 128))
+
+        masks = []
+
+        if(np.count_nonzero(mask_left) != 0):
+          points_left = cv2.findContours(
+              mask_left, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+          points_left = points_left[0][0].reshape((-1, 2)).tolist()
+
+          hand_left = np.array(points_left).astype(np.int32)
+          hand_left = hand_left.reshape((-1, 1, 2))
+
+          masks.append(hand_left)
+
+        if(np.count_nonzero(mask_right) != 0):
+          points_right = cv2.findContours(
+              mask_right, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+          points_right = points_right[0][0].reshape((-1, 2)).tolist()
+
+          hand_right = np.array(points_right).astype(np.int32)
+          hand_right = hand_right.reshape((-1, 1, 2))
+
+          masks.append(hand_right)
 
         self.masks.append(masks)
 
