@@ -47,7 +47,7 @@ def create_yolo_dataset(dataset: Dataset, output_path, black_white_ratio=0):
       image = cv2.imread(str(image_out_path))
       image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-      print(image_out_path)
+      # print(image_out_path)
 
       cv2.imwrite(str(image_out_path), image_gray)
 
@@ -138,7 +138,7 @@ if __name__ == "__main__":
   dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
   dataset.load_hof_sakher(hand_over_faces_sakher_path)
 
-  print(dataset.images)
+  print(len(dataset.images))
 
   create_yolo_dataset(dataset, output_path,
                       black_white_ratio=black_white_ratio)

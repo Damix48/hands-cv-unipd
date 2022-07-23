@@ -34,10 +34,10 @@ NormalizedBox NormalizedBox::fromYolo(float yoloX_, float yoloY_, float yoloW_, 
 }
 
 NormalizedBox NormalizedBox::fromRect(cv::Rect rect, cv::Size size) {
-  float cx_ = (rect.x + (rect.width / 2)) / size.width;
-  float cy_ = (rect.y + (rect.height / 2)) / size.height;
-  float w_ = rect.width / size.width;
-  float h_ = rect.height / size.height;
+  float cx_ = (float)(rect.x + (rect.width / 2)) / (float)size.width;
+  float cy_ = (float)(rect.y + (rect.height / 2)) / (float)size.height;
+  float w_ = (float)rect.width / (float)size.width;
+  float h_ = (float)rect.height / (float)size.height;
 
   return NormalizedBox(cx_, cy_, w_, h_);
 }
@@ -49,4 +49,60 @@ cv::Rect NormalizedBox::toRect(cv::Size size) const {
   float h_ = h * size.height;
 
   return cv::Rect(x_, y_, w_, h_);
+}
+
+bool operator<(const NormalizedBox& left, const NormalizedBox& right) {
+  if (left.cx < right.cx) {
+    return true;
+  }
+
+  if (left.cx > right.cx) {
+    return false;
+  }
+
+  if (left.cy < right.cy) {
+    return true;
+  }
+
+  if (left.cy > right.cy) {
+    return false;
+  }
+
+  if (left.w < right.w) {
+    return true;
+  }
+
+  if (left.w > right.w) {
+    return false;
+  }
+
+  if (left.h < right.h) {
+    return true;
+  }
+
+  if (left.h > right.h) {
+    return false;
+  }
+
+  return false;
+}
+
+bool operator>(const NormalizedBox& left, const NormalizedBox& right) {
+  return right < left;
+}
+
+bool operator<=(const NormalizedBox& left, const NormalizedBox& right) {
+  return !(left > right);
+}
+
+bool operator>=(const NormalizedBox& left, const NormalizedBox& right) {
+  return !(left < right);
+}
+
+bool operator==(const NormalizedBox& left, const NormalizedBox& right) {
+  return (left.cx == right.cx) && (left.cy == right.cy) && (left.w == right.w) && (left.h == right.h);
+}
+
+bool operator!=(const NormalizedBox& left, const NormalizedBox& right) {
+  return !(left == right);
 }

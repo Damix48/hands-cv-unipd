@@ -1,5 +1,6 @@
 #include "image.h"
 
+#include <algorithm>
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/dnn.hpp>
@@ -25,17 +26,43 @@ const cv::Mat Image::getImageBlob(cv::Size size) const {
   return blob;
 }
 
-void Image::addHand(Hand hand) {
-  hands.push_back(hand);
+void Image::addDetectedHand(Hand hand) {
+  detectedHands.push_back(hand);
+}
+
+void Image::addGroundTruthHand(Hand hand) {
+  groundTruthHands.push_back(hand);
 }
 
 cv::Mat Image::getDetected() const {
   cv::Mat temp(data);
-  for (Hand hand : hands) {
+  for (Hand hand : detectedHands) {
     cv::rectangle(temp, hand.getBox().toRect(data.size()), cv::Scalar(255, 0, 0));
   }
 
   return temp;
+}
+
+std::vector<float> Image::getIOUs() const {
+  std::vector<float> IOCs;
+
+  std::vector<Hand> detected = detectedHands;
+  std::vector<Hand> groundTruth = groundTruthHands;
+
+  std::sort(detected.begin(), detected.end());
+  std::sort(groundTruth.begin(), groundTruth.end());
+
+  int size_ = detected.size();
+
+  if (detected.size() > groundTruth.size()) {
+    size_ = groundTruth.size();
+  }
+
+  for (int i = 0; i < size_; ++i) {
+    IOCs.push_back(detected[i].computeBoxIOU(groundTruth[i], size()));
+  }
+
+  return IOCs;
 }
 
 cv::Size Image::size() const {
