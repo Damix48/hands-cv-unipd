@@ -152,7 +152,7 @@ class Dataset:
   def load_background(self, dataset_path, retain=1, skip_images=[]):
     images_folder = pathlib.Path(dataset_path)
 
-    images_paths = list(images_folder.glob('**/*.jpg'))
+    images_paths = list(images_folder.glob('**/*.png'))
     images_paths.sort()
 
     for image_path in images_paths:
