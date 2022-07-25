@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "image.h"
+#include "loader.h"
 #include "yolo_detector.h"
 
 int main(int argc, const char** argv) {
@@ -12,7 +13,8 @@ int main(int argc, const char** argv) {
       "{help h usage ? |      | print this message   }"
       "{@path          |      | image path           }"
       "{@model         |      | yolo model path      }"
-      "{folder         |      | image path           }";
+      "{boxes          |      | bounding boxes path  }"
+      "{masks          |      | masks path  }";
 
   cv::CommandLineParser parser(argc, argv, keys);
 
@@ -24,22 +26,27 @@ int main(int argc, const char** argv) {
 
   std::string path = parser.get<std::string>("@path");
   std::string modelPath = parser.get<std::string>("@model");
-  std::string folder = parser.get<std::string>("folder");
+  std::string boxesPath = parser.get<std::string>("boxes");
+  std::string masksPath = parser.get<std::string>("masks");
 
   YoloDetector detector(modelPath, 640);
 
-  std::vector<std::string> files;
+  std::vector<Image> images = Loader::loadImages(path);
 
-  cv::glob(folder, files);
+  if (boxesPath != "") {
+    Loader::loadBoxes(boxesPath, images);
+  }
 
-  for (int i = 0; i < files.size(); i++) {
-    path = files[i];
-
-    Image img(path);
+  for (int i = 0; i < images.size(); i++) {
+    Image img = images[i];
 
     detector.detect(img);
 
     cv::imshow("prova" + std::to_string(i), img.getDetected());
+
+    for (float IOU : img.getIOUs()) {
+      std::cout << IOU << std::endl;
+    }
 
     cv::waitKey(0);
   }

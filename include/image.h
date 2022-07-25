@@ -9,7 +9,9 @@
 
 class Image {
   cv::Mat data;
-  std::vector<Hand> hands;
+
+  std::vector<Hand> detectedHands;
+  std::vector<Hand> groundTruthHands;
 
  public:
   Image(cv::Mat src);
@@ -17,13 +19,14 @@ class Image {
 
   const cv::Mat getImageBlob(cv::Size size) const;
 
-  void addHand(Hand hand);
+  void addDetectedHand(Hand hand);
+  void addGroundTruthHand(Hand hand);
 
   cv::Mat getDetected() const;
 
-  cv::Size size() const;
+  std::vector<float> getIOUs() const;
 
-  std::vector<Hand>& getHands();
+  cv::Size size() const;
 };
 
 #endif  // IMAGE_H

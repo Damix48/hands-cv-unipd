@@ -16,6 +16,13 @@ class NormalizedBox {
   static NormalizedBox fromRect(cv::Rect rect, cv::Size size);
 
   cv::Rect toRect(cv::Size size) const;
+
+  friend bool operator<(const NormalizedBox& left, const NormalizedBox& right);
+  friend bool operator>(const NormalizedBox& left, const NormalizedBox& right);
+  friend bool operator<=(const NormalizedBox& left, const NormalizedBox& right);
+  friend bool operator>=(const NormalizedBox& left, const NormalizedBox& right);
+  friend bool operator==(const NormalizedBox& left, const NormalizedBox& right);
+  friend bool operator!=(const NormalizedBox& left, const NormalizedBox& right);
 };
 
 #endif  // NORMALIZED_BOX_H

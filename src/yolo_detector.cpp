@@ -38,6 +38,7 @@ void YoloDetector::detect(Image& img) {
     float w_ = output.at<float>(i, 2);  // width
     float h_ = output.at<float>(i, 3);  // height
     float score = output.at<float>(i, 4);
+
     try {
       NormalizedBox box = NormalizedBox::fromYolo(x_, y_, w_, h_, inputSize);
 
@@ -60,10 +61,10 @@ void YoloDetector::detect(Image& img) {
     indices.push_back(i);
   }
 
-  cv::dnn::NMSBoxes(boxes, scores, 0.1, 0.2, indices);
+  cv::dnn::NMSBoxes(boxes, scores, 0.2, 0.15, indices);
 
   for (int index : indices) {
     Hand hand(normalizedBoxes[index]);
-    img.addHand(hand);
+    img.addDetectedHand(hand);
   }
 }
