@@ -1,6 +1,6 @@
 import pathlib
 import shutil
-from cv2 import THRESH_BINARY
+import random
 import scipy.io
 import numpy as np
 import cv2
@@ -149,6 +149,18 @@ class Dataset:
 
         self.masks.append(masks)
 
+  def load_background(self, dataset_path, retain=1, skip_images=[]):
+    images_folder = pathlib.Path(dataset_path)
+
+    images_paths = list(images_folder.glob('**/*.jpg'))
+    images_paths.sort()
+
+    for image_path in images_paths:
+      if(random.random() < retain):
+        if(image_path.stem not in skip_images):
+          self.images.append(image_path)
+          self.masks.append(None)
+
   def generate_images(self, output_path):
     for i in range(len(self.images)):
       out_path = output_path.joinpath('img_' + str(i).zfill(5) + '.jpg')
@@ -164,98 +176,84 @@ class Dataset:
     for i in range(len(self.masks)):
       masks = self.masks[i]
 
-      img = cv2.imread(str(self.images[i]))
+      if(masks != None):
+        img = cv2.imread(str(self.images[i]))
 
-      width = img.shape[1]
-      height = img.shape[0]
+        width = img.shape[1]
+        height = img.shape[0]
 
-      masks_path = []
-
-      if(merge):
-        masks_image = np.zeros((height, width, 1), np.uint8)
-
-      for j in range(len(masks)):
-        hand = masks[j]
-
-        out_path = output_path.joinpath(
-            'img_' + str(i).zfill(5) + '_' + str(j).zfill(2) + '.png')
-        pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
-
-        mask = np.zeros((height, width, 1), np.uint8)
-        cv2.fillPoly(mask, [hand], 1, 1)
-
-        cv2.imwrite(str(out_path), mask*255)
-
-        masks_path.append(out_path)
+        masks_path = []
 
         if(merge):
-          cv2.fillPoly(masks_image, [hand], 1, 1)
+          masks_image = np.zeros((height, width, 1), np.uint8)
 
-      self.splitted_masks.append(masks_path)
+        for j in range(len(masks)):
+          hand = masks[j]
 
-      if(merge):
-        out_path = pathlib.Path(output_path.parents[0], (
-            output_path.name + '_merged'), ('img_' + str(i).zfill(5) + '.png'))
-        pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+          out_path = output_path.joinpath(
+              'img_' + str(i).zfill(5) + '_' + str(j).zfill(2) + '.png')
+          pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
 
-        cv2.imwrite(str(out_path), masks_image*255)
+          mask = np.zeros((height, width, 1), np.uint8)
+          cv2.fillPoly(mask, [hand], 1, 1)
 
-        self.merged_masks.append(out_path)
+          cv2.imwrite(str(out_path), mask*255)
+
+          masks_path.append(out_path)
+
+          if(merge):
+            cv2.fillPoly(masks_image, [hand], 1, 1)
+
+        self.splitted_masks.append(masks_path)
+
+        if(merge):
+          out_path = pathlib.Path(output_path.parents[0], (
+              output_path.name + '_merged'), ('img_' + str(i).zfill(5) + '.png'))
+          pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+
+          cv2.imwrite(str(out_path), masks_image*255)
+
+          self.merged_masks.append(out_path)
+      else:
+        self.splitted_masks.append(None)
+        self.merged_masks.append(None)
 
   def generate_boxes(self, output_path, normalize=False, line_start=None):
     for i in range(len(self.splitted_masks)):
-      boxes = []
-
-      if(normalize):
-        normalized_boxes = []
-
-      for mask in self.splitted_masks[i]:
-        img = cv2.imread(str(mask), cv2.CV_8U)
-
-        box = cv2.boundingRect(img)
-
-        boxes.append(box)
+      if(self.splitted_masks[i] != None):
+        boxes = []
 
         if(normalize):
-          width = img.shape[1]
-          height = img.shape[0]
+          normalized_boxes = []
 
-          x, y, w, h = box
-          x = (x + (w / 2)) / width
-          y = (y + (h / 2)) / height
-          w = w / width
-          h = h / height
+        for mask in self.splitted_masks[i]:
+          img = cv2.imread(str(mask), cv2.CV_8U)
 
-          normalized_boxes.append([x, y, w, h])
+          box = cv2.boundingRect(img)
 
-      self.boxes.append(boxes)
+          boxes.append(box)
 
-      out_path = output_path.joinpath('img_' + str(i).zfill(5) + '.txt')
-      pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+          if(normalize):
+            width = img.shape[1]
+            height = img.shape[0]
 
-      with open(out_path, 'w') as f:
-        content = ''
+            x, y, w, h = box
+            x = (x + (w / 2)) / width
+            y = (y + (h / 2)) / height
+            w = w / width
+            h = h / height
 
-        for box in self.boxes[i]:
-          if(line_start != None):
-            content = content + line_start + '\t' + \
-                ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
-          else:
-            content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
+            normalized_boxes.append([x, y, w, h])
 
-        f.write(content)
+        self.boxes.append(boxes)
 
-      if(normalize):
-        self.normalized_boxes.append(normalized_boxes)
-
-        out_path = pathlib.Path(
-            output_path.parents[0], (output_path.name + '_normalized'), ('img_' + str(i).zfill(5) + '.txt'))
+        out_path = output_path.joinpath('img_' + str(i).zfill(5) + '.txt')
         pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
 
         with open(out_path, 'w') as f:
           content = ''
 
-          for box in self.normalized_boxes[i]:
+          for box in self.boxes[i]:
             if(line_start != None):
               content = content + line_start + '\t' + \
                   ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
@@ -264,7 +262,48 @@ class Dataset:
 
           f.write(content)
 
-        self.normalized_boxes_paths.append(out_path)
+        if(normalize):
+          self.normalized_boxes.append(normalized_boxes)
+
+          out_path = pathlib.Path(
+              output_path.parents[0], (output_path.name + '_normalized'), ('img_' + str(i).zfill(5) + '.txt'))
+          pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+
+          with open(out_path, 'w') as f:
+            content = ''
+
+            for box in self.normalized_boxes[i]:
+              if(line_start != None):
+                content = content + line_start + '\t' + \
+                    ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
+              else:
+                content = content + ('{}\t{}\t{}\t{}'.format(*box)) + '\n'
+
+            f.write(content)
+
+          self.normalized_boxes_paths.append(out_path)
+      else:
+        self.boxes.append(None)
+
+        out_path = output_path.joinpath('img_' + str(i).zfill(5) + '.txt')
+        pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+
+        with open(out_path, 'w') as f:
+          content = ''
+          f.write(content)
+
+        if(normalize):
+          self.normalized_boxes.append(None)
+
+          out_path = pathlib.Path(
+              output_path.parents[0], (output_path.name + '_normalized'), ('img_' + str(i).zfill(5) + '.txt'))
+          pathlib.Path(out_path.parents[0]).mkdir(parents=True, exist_ok=True)
+
+          with open(out_path, 'w') as f:
+            content = ''
+            f.write(content)
+
+          self.normalized_boxes_paths.append(out_path)
 
   def generate_hand(self, output_path):
     for i in range(len(self.images)):

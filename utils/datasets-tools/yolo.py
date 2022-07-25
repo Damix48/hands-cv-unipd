@@ -47,8 +47,6 @@ def create_yolo_dataset(dataset: Dataset, output_path, black_white_ratio=0):
       image = cv2.imread(str(image_out_path))
       image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-      print(image_out_path)
-
       cv2.imwrite(str(image_out_path), image_gray)
 
   temp_folder.cleanup()
@@ -65,6 +63,8 @@ cli_parser.add_argument('--gtea', '--gtea-gaze-plus-path',
                         action='store', help="Path to the GTEA Gaze+ folder")
 cli_parser.add_argument('--sakher', '--hand-over-faces-sakher-path',
                         action='store', help="Path to the HandOverFaces By Sakher folder")
+cli_parser.add_argument('--bg', '--background-path',
+                        action='store', help="Path to the background folder")
 cli_parser.add_argument('--bw', '--black-white-ratio',
                         action='store', help="Ratio from 0-1 for black and white images", type=float, default=0)
 cli_parser.add_argument('-o', '--output',
@@ -80,13 +80,14 @@ def get_arguments():
   gtea_gaze_plus_path = args.gtea
   black_white_ratio = args.bw
   hand_over_faces_sakher_path = args.sakher
+  background_path = args.bg
   output_path = args.output
 
-  return egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, output_path
+  return egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, background_path, output_path
 
 
 if __name__ == "__main__":
-  egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, output_path = get_arguments()
+  egohands_path, hand_over_faces_path, gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, background_path, output_path = get_arguments()
 
   print(egohands_path, hand_over_faces_path,
         gtea_gaze_plus_path, black_white_ratio, hand_over_faces_sakher_path, output_path)
@@ -137,8 +138,7 @@ if __name__ == "__main__":
       hand_over_faces_path, skip_images=hand_over_face_skip)
   dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
   dataset.load_hof_sakher(hand_over_faces_sakher_path)
-
-  print(dataset.images)
+  dataset.load_background(background_path, retain=0.2)
 
   create_yolo_dataset(dataset, output_path,
                       black_white_ratio=black_white_ratio)
