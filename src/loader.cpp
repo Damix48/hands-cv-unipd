@@ -77,3 +77,28 @@ void Loader::loadBoxes(std::filesystem::path path_, std::vector<Image>& images) 
     }
   }
 }
+
+void Loader::loadMasks(std::filesystem::path path_, std::vector<Image>& images) {
+  if (!std::filesystem::exists(path_)) {
+    throw std::invalid_argument("The path specified (" + path_.string() + ") don't exists");
+  }
+
+  std::vector<std::string> paths;
+
+  if (std::filesystem::is_directory(path_)) {
+    cv::glob(path_, paths);
+  } else {
+    paths.push_back(path_);
+  }
+
+  if (paths.size() != images.size()) {
+    throw std::invalid_argument("The number of boxes files (" + std::to_string(paths.size()) + ") is different to the number of images (" + std::to_string(images.size()) + ")");
+  }
+
+  for (int i = 0; i < paths.size(); ++i) {
+    std::filesystem::path path = paths[i];
+    Image& image = images[i];
+
+    image.setGroundTruthMasks(path);
+  }
+}

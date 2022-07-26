@@ -61,7 +61,7 @@ void YoloDetector::detect(Image& img) {
     indices.push_back(i);
   }
 
-  cv::dnn::NMSBoxes(boxes, scores, 0.2, 0.15, indices);
+  cv::dnn::NMSBoxes(boxes, scores, 0.6, 0.4, indices);
 
   for (int index : indices) {
     Hand hand(normalizedBoxes[index]);
