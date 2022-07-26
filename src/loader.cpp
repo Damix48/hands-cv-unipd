@@ -92,7 +92,7 @@ void Loader::loadMasks(std::filesystem::path path_, std::vector<Image>& images) 
   }
 
   if (paths.size() != images.size()) {
-    throw std::invalid_argument("The number of boxes files (" + std::to_string(paths.size()) + ") is different to the number of images (" + std::to_string(images.size()) + ")");
+    throw std::invalid_argument("The number of masks files (" + std::to_string(paths.size()) + ") is different to the number of images (" + std::to_string(images.size()) + ")");
   }
 
   for (int i = 0; i < paths.size(); ++i) {

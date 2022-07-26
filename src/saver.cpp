@@ -25,10 +25,7 @@ void Saver::save(const std::vector<Image>& images) {
   std::filesystem::create_directory(boxPath);
 
   for (int i = 0; i < images.size(); ++i) {
-    std::string str = std::to_string(i + 1);
-    size_t n = 2;
-    int precision = n - std::min(n, str.size());
-    std::string stem = std::string(precision, '0').append(str);
+    std::string stem = std::filesystem::path(images[i].getPath()).stem();
 
     std::filesystem::path detectionOutput = detectionPath.append(stem + ".jpg");
     cv::imwrite(detectionOutput, images[i].getDetected());

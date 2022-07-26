@@ -12,12 +12,13 @@
 
 int main(int argc, const char** argv) {
   const std::string keys =
-      "{help h usage ? |      | print this message   }"
-      "{@path          |      | image path           }"
-      "{@model         |      | yolo model path      }"
-      "{boxes          |      | bounding boxes path  }"
-      "{masks          |      | masks path           }"
-      "{output         |      | output path          }";
+      "{help h usage ? |       | print this message   }"
+      "{@path          |       | image path           }"
+      "{@model         |       | yolo model path                               }"
+      "{boxes          |       | ground-truth bounding boxes path              }"
+      "{masks          |       | ground-truth masks path           }"
+      "{output         |       | output path          }"
+      "{display        | false | show images during detection and segmentation }";
 
   cv::CommandLineParser parser(argc, argv, keys);
 
@@ -32,6 +33,7 @@ int main(int argc, const char** argv) {
   std::string boxesPath = parser.get<std::string>("boxes");
   std::string masksPath = parser.get<std::string>("masks");
   std::string outputPath = parser.get<std::string>("output");
+  bool display = parser.get<bool>("display");
 
   YoloDetector detector(modelPath, 640);
   Saver saver(outputPath);
@@ -51,13 +53,15 @@ int main(int argc, const char** argv) {
 
     detector.detect(img);
 
-    // cv::imshow("prova" + std::to_string(i), img.getDetected());
-    // cv::imwrite(outputPath + "//prova" + std::to_string(i) + ".jpg", img.getDetected());
-    // cv::waitKey(0);
+    if (display) {
+      cv::imshow("prova" + std::to_string(i), img.getDetected());
+      cv::waitKey(10);
+    }
 
     img.generateMasks();
 
     Printer::print(img);
+    cv::waitKey(0);
 
     // cv::imshow("mask" + std::to_string(i), img.getMasks());
   }
