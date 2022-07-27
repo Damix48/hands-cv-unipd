@@ -10,7 +10,8 @@
 #include "saver.h"
 #include "yolo_detector.h"
 
-int main(int argc, const char** argv) {
+int main(int argc, const char **argv)
+{
   const std::string keys =
       "{help h usage ? |       | print this message   }"
       "{@path          |       | image path           }"
@@ -23,7 +24,9 @@ int main(int argc, const char** argv) {
   cv::CommandLineParser parser(argc, argv, keys);
 
   parser.about("Hand v1.0.0");
-  if (parser.has("help")) {
+  if (parser.has("help"))
+  {
+    
     parser.printMessage();
     return 0;
   }
@@ -40,20 +43,24 @@ int main(int argc, const char** argv) {
 
   std::vector<Image> images = Loader::loadImages(path);
 
-  if (boxesPath != "") {
+  if (boxesPath != "")
+  {
     Loader::loadBoxes(boxesPath, images);
   }
 
-  if (masksPath != "") {
+  if (masksPath != "")
+  {
     Loader::loadMasks(masksPath, images);
   }
 
-  for (int i = 0; i < images.size(); i++) {
-    Image& img = images[i];
+  for (int i = 0; i < images.size(); i++)
+  {
+    Image &img = images[i];
 
     detector.detect(img);
 
-    if (display) {
+    if (display)
+    {
       cv::imshow("prova" + std::to_string(i), img.getDetected());
       cv::waitKey(10);
     }

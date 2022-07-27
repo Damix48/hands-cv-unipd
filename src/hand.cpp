@@ -4,17 +4,20 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/intensity_transform.hpp>
 
 #include "normalized_box.h"
 #include "segmentation_utils.h"
 
 Hand::Hand(NormalizedBox box_) : box(box_) {}
 
-NormalizedBox Hand::getBox() const {
+NormalizedBox Hand::getBox() const
+{
   return box;
 }
 
-float Hand::computeBoxIOU(Hand hand, cv::Size size) {
+float Hand::computeBoxIOU(Hand hand, cv::Size size)
+{
   cv::Mat detectedBox = cv::Mat::zeros(size, CV_8U);
   cv::Mat groundTruthBox = cv::Mat::zeros(size, CV_8U);
 
@@ -37,24 +40,43 @@ float Hand::computeBoxIOU(Hand hand, cv::Size size) {
   return (float)cv::countNonZero(intersectionImg) / (float)cv::countNonZero(unionImg);
 }
 
-cv::Mat Hand::getHandBox(cv::Mat src, float scale, int padding) {
+cv::Mat Hand::getHandBox(cv::Mat src, float &scale, int padding)
+{
   cv::Mat handBox;
 
   cv::Rect rect = getBox().toRect(src.size());
-  if (rect.x != 0) {
+  if (rect.x > padding)
+  {
     rect.x -= padding;
   }
-  if (rect.y != 0) {
+  if (rect.y > padding)
+  {
     rect.y -= padding;
   }
-  if (rect.x + rect.width + 2 * padding < src.cols) {
-    rect.width += 2 * padding;
+  if (rect.x + rect.width + padding + 1 < src.cols)
+  {
+    rect.width += padding + 1;
   }
-  if (rect.y + rect.height + 2 * padding < src.rows) {
-    rect.height += 2 * padding;
+  if (rect.y + rect.height + padding + 1 < src.rows)
+  {
+    rect.height += padding + 1;
   }
 
   src(rect).copyTo(handBox);
+
+  if (handBox.cols * scale > 600 || handBox.rows * scale > 600)
+  {
+    if (handBox.cols > handBox.rows)
+    {
+      int width = 600;
+      scale = (float)width / (float)handBox.cols;
+    }
+    else
+    {
+      int height = 600;
+      scale = (float)height / (float)handBox.rows;
+    }
+  }
 
   cv::Size sizeScaled(rect.width, rect.height);
   sizeScaled.width *= scale;
@@ -65,11 +87,15 @@ cv::Mat Hand::getHandBox(cv::Mat src, float scale, int padding) {
   return handBox;
 }
 
-void Hand::generateMask(cv::Mat src) {
+void Hand::generateMask(cv::Mat src)
+{
   cv::Mat bgr;
-  if (src.channels() == 1) {
+  if (src.channels() == 1)
+  {
     cv::cvtColor(src, bgr, cv::COLOR_GRAY2BGR);
-  } else {
+  }
+  else
+  {
     src.copyTo(bgr);
   }
 
@@ -78,59 +104,87 @@ void Hand::generateMask(cv::Mat src) {
 
   cv::Mat img = getHandBox(bgr, scale, padding);
 
-  cv::Mat grabCutMask = segmentation::grabCutRect(img, 10, padding);
+  cv::Mat grabCutMask = segmentation::grabCutRect(img, 10, padding); // choose 7 or 10
+
+  int nonzeros = cv::countNonZero(grabCutMask);
+  int i = 0;
+  while (nonzeros < grabCutMask.rows * grabCutMask.cols * 0.1 && i < 3)
+  {
+    scale += 0.2;
+    img = getHandBox(bgr, scale, padding);
+    grabCutMask = segmentation::grabCutRect(img, 10, padding);
+    nonzeros = cv::countNonZero(grabCutMask);
+  }
+
+  cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+  cv::morphologyEx(grabCutMask, grabCutMask, cv::MORPH_OPEN, kernel);
+
+  // discharge the smallest (with area < 20%) connected component
+  grabCutMask = segmentation::getLargestConnectedComponents(grabCutMask, 0.2 * grabCutMask.cols * grabCutMask.rows);
+
+  cv::Mat img1 = segmentation::getMaskIntersectImage(img, grabCutMask);
+
+  cv::intensity_transform::BIMEF(img1, img1);
+
+  cv::Mat img2 = segmentation::SLICSuperPixel(img1, 300, 20, 30.0, 25, 100);
+
+  cv::Mat threshMask = segmentation::skinThreshold(img2);
+  cv::Mat img3 = segmentation::getMaskIntersectImage(img1, threshMask);
+
+  // if thresholding is gone wrong (e.g., because of hands with gloves) keep grabCutMask as final result
+  cv::Mat result;
+  if (cv::countNonZero(threshMask) < 0.1 * threshMask.rows * threshMask.cols)
+  {
+    result = img1;
+  }
+  else
+  {
+    result = segmentation::getMaskIntersectImage(img1, threshMask);
+  }
+  
+
+  // Convert the result of the segmentation in a mask of type CV_8UC1
+  cv::Mat segmMask = cv::Mat::zeros(result.size(), CV_8UC1);
+  for (int i = 0; i < result.rows; i++)
+  {
+    for (int j = 0; j < result.cols; j++)
+    {
+      if (result.at<cv::Vec3b>(i, j) != cv::Vec3b(0, 0, 0))
+      {
+        segmMask.at<uchar>(i, j) = 255;
+      }
+    }
+  }
 
   cv::Rect rect = getBox().toRect(bgr.size());
   cv::Size sizeScaled(rect.width, rect.height);
 
-  cv::resize(grabCutMask, grabCutMask, sizeScaled);
+  cv::resize(segmMask, segmMask, sizeScaled);
 
-  grabCutMask.copyTo(mask);
+  segmMask.copyTo(mask);
 }
 
-cv::Mat Hand::getMask() {
+cv::Mat Hand::getMask()
+{
   return mask;
 }
 
-bool operator<(const Hand& left, const Hand& right) {
+bool operator<(const Hand &left, const Hand &right)
+{
   return left.getBox() < right.getBox();
 }
 
-bool operator>(const Hand& left, const Hand& right) {
+bool operator>(const Hand &left, const Hand &right)
+{
   return right < left;
 }
 
-bool operator<=(const Hand& left, const Hand& right) {
+bool operator<=(const Hand &left, const Hand &right)
+{
   return !(left > right);
 }
 
-bool operator>=(const Hand& left, const Hand& right) {
+bool operator>=(const Hand &left, const Hand &right)
+{
   return !(left < right);
-}
-
-void Hand::showSkin(cv::Mat img) {
-  cv::Mat hand;
-  img.copyTo(hand);
-  hand = hand(getBox().toRect(img.size()));
-
-  cv::Mat hsv, hsv_mask;
-  cv::cvtColor(hand, hsv, cv::COLOR_BGR2HSV);
-  cv::inRange(hsv, cv::Scalar(0, 15, 0), cv::Scalar(17, 170, 255), hsv_mask);
-  cv::morphologyEx(hsv_mask, hsv_mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-
-  cv::Mat YCrCb, YCrCb_mask;
-  cv::cvtColor(hand, YCrCb, cv::COLOR_BGR2YCrCb);
-  cv::inRange(YCrCb, cv::Scalar(0, 135, 85), cv::Scalar(255, 180, 135), YCrCb_mask);
-  cv::morphologyEx(YCrCb_mask, YCrCb_mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-
-  cv::Mat mask;
-  cv::bitwise_and(hsv_mask, YCrCb_mask, mask);
-  cv::medianBlur(mask, mask, 3);
-  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(4, 4)));
-
-  cv::imshow("hsv", hsv_mask);
-  cv::imshow("hYCrCbsv", YCrCb_mask);
-  cv::imshow("mask", mask);
-
-  cv::waitKey(0);
 }
