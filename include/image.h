@@ -28,6 +28,7 @@ class Image {
 
   void generateMasks();
   cv::Mat getMasks() const;
+  cv::Mat getOverlayMasks() const;
   void setGroundTruthMasks(cv::Mat masks);
   void setGroundTruthMasks(std::string path);
 

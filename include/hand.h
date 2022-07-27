@@ -18,7 +18,7 @@ class Hand {
   float computeBoxIOU(Hand hand, cv::Size size);
 
   void generateMask(cv::Mat src);
-  cv::Mat getMask();
+  cv::Mat getMask() const;
 
   void showSkin(cv::Mat img);
 

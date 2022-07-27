@@ -55,7 +55,8 @@ void Image::addGroundTruthHand(Hand hand) {
 void Image::generateMasks() {
   detectedMasks = cv::Mat::zeros(size(), CV_8U);
 
-  for (Hand hand : detectedHands) {
+  for (Hand& hand : detectedHands) {
+    std::cout << "hand" << std::endl;
     hand.generateMask(data);
 
     cv::Mat roiMasks = detectedMasks(hand.getBox().toRect(detectedMasks.size()));
@@ -66,6 +67,35 @@ void Image::generateMasks() {
 
 cv::Mat Image::getMasks() const {
   return detectedMasks;
+}
+
+cv::Mat Image::getOverlayMasks() const {
+  cv::Mat result;
+  data.copyTo(result);
+
+  for (int i = 0; i < detectedHands.size(); ++i) {
+    const Hand& hand = detectedHands[i];
+    int hue = ((float)255 / detectedHands.size()) * i;
+    cv::Mat mask = cv::Mat::zeros(hand.getMask().size(), CV_8UC3);
+
+    cv::Mat colorHLS = cv::Mat(1, 1, CV_8UC3, cv::Scalar(hue, 125, 125));
+    cv::Mat color;
+    cv::cvtColor(colorHLS, color, cv::COLOR_HLS2BGR_FULL);
+
+    mask.setTo(cv::Scalar(std::rand() % 255, std::rand() % 255, std::rand() % 255), hand.getMask());
+
+    // cv::imshow("CIAO", hand.getMask());
+    // cv::imshow("CIAO2", mask);
+    // cv::waitKey(0);
+
+    cv::Mat roiMasks = result(hand.getBox().toRect(result.size()));
+    cv::addWeighted(roiMasks, 0.5, mask, 0.8, 0, roiMasks);
+    // roiMasks = roiMasks + mask;
+
+    // roiMasks.setTo(cv::Scalar(255, 255, 0), hand.getMask());
+  }
+
+  return result;
 }
 
 void Image::setGroundTruthMasks(cv::Mat mask) {

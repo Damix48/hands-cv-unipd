@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <string>
@@ -27,13 +28,16 @@ void Saver::save(const std::vector<Image>& images) {
   for (int i = 0; i < images.size(); ++i) {
     std::string stem = std::filesystem::path(images[i].getPath()).stem();
 
-    std::filesystem::path detectionOutput = detectionPath.append(stem + ".jpg");
+    std::filesystem::path detectionOutput = detectionPath;
+    detectionOutput.append(stem + ".jpg");
     cv::imwrite(detectionOutput, images[i].getDetected());
 
-    std::filesystem::path maskOutput = maskPath.append(stem + ".png");
+    std::filesystem::path maskOutput = maskPath;
+    maskOutput.append(stem + ".png");
     cv::imwrite(maskOutput, images[i].getMasks());
 
-    std::filesystem::path boxOutput = boxPath.append(stem + ".txt");
+    std::filesystem::path boxOutput = boxPath;
+    boxOutput.append(stem + ".txt");
     std::ofstream boxes(boxOutput);
     for (Hand hand : images[i].getHands()) {
       cv::Rect box = hand.getBox().toRect(images[i].size());
