@@ -4,17 +4,16 @@
 #include <opencv2/core.hpp>
 #include <string>
 
-namespace segmentation
-{
-    cv::Mat getMaskIntersectImage(cv::Mat src, cv::Mat mask);
+namespace segmentation {
+cv::Mat getMaskIntersectImage(cv::Mat src, cv::Mat mask);
 
-    std::vector<cv::Mat> normalizeRGB(cv::Mat RChannel, cv::Mat GChannel, cv::Mat BChannel);
-    cv::Mat getLargestConnectedComponents(cv::Mat src, int minArea);
+std::vector<cv::Mat> normalizeRGB(cv::Mat RChannel, cv::Mat GChannel, cv::Mat BChannel);
+cv::Mat getLargestConnectedComponents(cv::Mat src, int minArea);
 
-    cv::Mat grabCutRect(cv::Mat src, int iter, int padding = 0);
-    cv::Mat SLICSuperPixel(cv::Mat src, int superpixelNumber, int regionSize, float ruler, int minElementSize, int numberIterations);
-    cv::Mat skinThreshold(cv::Mat srSc);
+cv::Mat grabCutRect(cv::Mat src, int iter, int padding = 0);
+cv::Mat SLICSuperPixel(cv::Mat src, int superpixelNumber, int regionSize, float ruler, int minElementSize, int numberIterations);
+cv::Mat skinThreshold(cv::Mat srSc);
 
-} // namespace segmentation
+}  // namespace segmentation
 
-#endif // SEGM_UTILS_H
+#endif  // SEGM_UTILS_H

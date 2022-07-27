@@ -5,8 +5,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/ximgproc/slic.hpp>
 
-cv::Mat segmentation::getLargestConnectedComponents(cv::Mat src, int minArea)
-{
+cv::Mat segmentation::getLargestConnectedComponents(cv::Mat src, int minArea) {
   cv::Mat labels = cv::Mat::zeros(src.size(), CV_8U);
   cv::Mat stats;
   cv::Mat centroids;
@@ -15,18 +14,15 @@ cv::Mat segmentation::getLargestConnectedComponents(cv::Mat src, int minArea)
 
   cv::connectedComponentsWithStats(src, labels, stats, centroids, 4);
 
-  for (int i = 0; i < stats.rows; ++i)
-  {
-    if (stats.at<int>(i, cv::CC_STAT_AREA) > minArea)
-    {
+  for (int i = 0; i < stats.rows; ++i) {
+    if (stats.at<int>(i, cv::CC_STAT_AREA) > minArea) {
       components.push_back(i);
     }
   }
 
   cv::Mat result = cv::Mat::zeros(src.size(), CV_8U);
 
-  for (int index : components)
-  {
+  for (int index : components) {
     cv::Mat single;
     cv::inRange(labels, index, index, single);
     cv::bitwise_or(result, single, result);
@@ -37,8 +33,7 @@ cv::Mat segmentation::getLargestConnectedComponents(cv::Mat src, int minArea)
   return dst;
 }
 
-cv::Mat segmentation::grabCutRect(cv::Mat src, int iter, int padding)
-{
+cv::Mat segmentation::grabCutRect(cv::Mat src, int iter, int padding) {
   cv::Mat mask = cv::Mat::zeros(src.size(), CV_8U);
 
   cv::Rect box = cv::Rect(padding, padding, src.cols - padding - 1, src.rows - padding - 1);
@@ -60,14 +55,12 @@ cv::Mat segmentation::grabCutRect(cv::Mat src, int iter, int padding)
   return dst;
 }
 
-cv::Mat segmentation::SLICSuperPixel(cv::Mat src, int superpixelNumber, int regionSize, float ruler, int minElementSize, int numberIterations)
-{
+cv::Mat segmentation::SLICSuperPixel(cv::Mat src, int superpixelNumber, int regionSize, float ruler, int minElementSize, int numberIterations) {
   cv::Ptr<cv::ximgproc::SuperpixelSLIC> superpix = cv::ximgproc::createSuperpixelSLIC(src, cv::ximgproc::SLIC, regionSize, ruler);
   superpix->iterate(numberIterations);
 
   // merge small superpixels
-  if (minElementSize > 0)
-  {
+  if (minElementSize > 0) {
     superpix->enforceLabelConnectivity(minElementSize);
   }
   int nPix = superpix->getNumberOfSuperpixels();
@@ -82,18 +75,14 @@ cv::Mat segmentation::SLICSuperPixel(cv::Mat src, int superpixelNumber, int regi
   cv::split(src, channels);
 
   // compute the mean of the pixels colors for each superpixel
-  for (int l = 0; l < nPix; l++)
-  {
+  for (int l = 0; l < nPix; l++) {
     int b = 0;
     int g = 0;
     int r = 0;
     int count = 0;
-    for (int h = 0; h < labels.rows; h++)
-    {
-      for (int k = 0; k < labels.cols; k++)
-      {
-        if (labels.at<int>(h, k) == l)
-        {
+    for (int h = 0; h < labels.rows; h++) {
+      for (int k = 0; k < labels.cols; k++) {
+        if (labels.at<int>(h, k) == l) {
           count++;
           b += channels[0].at<uchar>(h, k);
           g += channels[1].at<uchar>(h, k);
@@ -108,14 +97,10 @@ cv::Mat segmentation::SLICSuperPixel(cv::Mat src, int superpixelNumber, int regi
   }
 
   // assign to each superpixel the color previously computed
-  for (int l = 0; l < labelColor.size(); l++)
-  {
-    for (int h = 0; h < labels.rows; h++)
-    {
-      for (int k = 0; k < labels.cols; k++)
-      {
-        if (labels.at<int>(h, k) == l)
-        {
+  for (int l = 0; l < labelColor.size(); l++) {
+    for (int h = 0; h < labels.rows; h++) {
+      for (int k = 0; k < labels.cols; k++) {
+        if (labels.at<int>(h, k) == l) {
           dst.at<cv::Vec3b>(h, k) = labelColor[l];
         }
       }
@@ -124,8 +109,7 @@ cv::Mat segmentation::SLICSuperPixel(cv::Mat src, int superpixelNumber, int regi
   return dst;
 }
 
-cv::Mat segmentation::skinThreshold(cv::Mat src)
-{
+cv::Mat segmentation::skinThreshold(cv::Mat src) {
   cv::Mat srcHSV;
   std::vector<cv::Mat> HSVchannels;
   cv::cvtColor(src, srcHSV, cv::COLOR_BGR2HSV);
@@ -144,12 +128,10 @@ cv::Mat segmentation::skinThreshold(cv::Mat src)
   // std::vector<cv::Mat> normRGBChannels = normalizeRGB(RGBChannels[0], RGBChannels[1], RGBChannels[2]);
 
   cv::Mat dst = cv::Mat::zeros(src.size(), CV_8UC1);
-  for (int i = 0; i < src.rows; i++)
-  {
+  for (int i = 0; i < src.rows; i++) {
     {
-      for (int j = 0; j < src.cols; j++)
-      {
-        if (HSVchannels[0].at<uchar>(i, j) <= 20 || HSVchannels[0].at<uchar>(i, j) >= 120) //((normRGBChannels[0].at<float>(i, j) / normRGBChannels[1].at<float>(i, j)) >= 1 && ((HSVchannels[0].at<uchar>(i, j) <= 20 || HSVchannels[0].at<uchar>(i, j) >= 120) && (YCrCbchannels[1].at<uchar>(i, j) >= 128 && YCrCbchannels[1].at<uchar>(i, j) <= 173) && (YCrCbchannels[2].at<uchar>(i, j) >= 77 && YCrCbchannels[2].at<uchar>(i, j) <= 132)))
+      for (int j = 0; j < src.cols; j++) {
+        if (HSVchannels[0].at<uchar>(i, j) <= 20 || HSVchannels[0].at<uchar>(i, j) >= 120)  //((normRGBChannels[0].at<float>(i, j) / normRGBChannels[1].at<float>(i, j)) >= 1 && ((HSVchannels[0].at<uchar>(i, j) <= 20 || HSVchannels[0].at<uchar>(i, j) >= 120) && (YCrCbchannels[1].at<uchar>(i, j) >= 128 && YCrCbchannels[1].at<uchar>(i, j) <= 173) && (YCrCbchannels[2].at<uchar>(i, j) >= 77 && YCrCbchannels[2].at<uchar>(i, j) <= 132)))
         {
           dst.at<uchar>(i, j) = 255;
         }
@@ -160,10 +142,8 @@ cv::Mat segmentation::skinThreshold(cv::Mat src)
   return dst;
 }
 
-std::vector<cv::Mat> segmentation::normalizeRGB(cv::Mat RChannel, cv::Mat GChannel, cv::Mat BChannel)
-{
-  if (RChannel.type() != CV_8UC1 || GChannel.type() != CV_8UC1 || BChannel.type() != CV_8UC1)
-  {
+std::vector<cv::Mat> segmentation::normalizeRGB(cv::Mat RChannel, cv::Mat GChannel, cv::Mat BChannel) {
+  if (RChannel.type() != CV_8UC1 || GChannel.type() != CV_8UC1 || BChannel.type() != CV_8UC1) {
     std::cerr << "R,G,B must be CV_8U" << std::endl;
     return cv::Mat();
   }
@@ -171,19 +151,14 @@ std::vector<cv::Mat> segmentation::normalizeRGB(cv::Mat RChannel, cv::Mat GChann
   cv::Mat normR = cv::Mat::zeros(RChannel.size(), CV_32F);
   cv::Mat normG = cv::Mat::zeros(GChannel.size(), CV_32F);
   cv::Mat normB = cv::Mat::zeros(BChannel.size(), CV_32F);
-  for (int h = 0; h < RChannel.rows; h++)
-  {
-    for (int k = 0; k < RChannel.cols; k++)
-    {
+  for (int h = 0; h < RChannel.rows; h++) {
+    for (int k = 0; k < RChannel.cols; k++) {
       int rgb = RChannel.at<uchar>(h, k) + GChannel.at<uchar>(h, k) + BChannel.at<uchar>(h, k);
-      if (rgb == 0)
-      {
+      if (rgb == 0) {
         normR.at<float>(h, k) = 0.0;
         normG.at<float>(h, k) = 0.0;
         normB.at<float>(h, k) = 0.0;
-      }
-      else
-      {
+      } else {
         normR.at<float>(h, k) = (float)RChannel.at<uchar>(h, k) / (float)rgb;
         normG.at<float>(h, k) = (float)GChannel.at<uchar>(h, k) / (float)rgb;
         normB.at<float>(h, k) = (float)BChannel.at<uchar>(h, k) / (float)rgb;
@@ -199,27 +174,21 @@ std::vector<cv::Mat> segmentation::normalizeRGB(cv::Mat RChannel, cv::Mat GChann
   return normRGBChannels;
 }
 
-cv::Mat segmentation::getMaskIntersectImage(cv::Mat src, cv::Mat mask)
-{
-  if (mask.size() != src.size())
-  {
+cv::Mat segmentation::getMaskIntersectImage(cv::Mat src, cv::Mat mask) {
+  if (mask.size() != src.size()) {
     std::cerr << "src and mask must have the same size" << std::endl;
     return cv::Mat();
   }
 
-  if (mask.type() != CV_8UC1)
-  {
+  if (mask.type() != CV_8UC1) {
     std::cerr << "mask must be CV_8UC1" << std::endl;
     return cv::Mat();
   }
 
   cv::Mat dst = cv::Mat::zeros(src.size(), CV_8UC3);
-  for (int i = 0; i < src.rows; i++)
-  {
-    for (int j = 0; j < src.cols; j++)
-    {
-      if (mask.at<uchar>(i, j) == 255)
-      {
+  for (int i = 0; i < src.rows; i++) {
+    for (int j = 0; j < src.cols; j++) {
+      if (mask.at<uchar>(i, j) == 255) {
         dst.at<cv::Vec3b>(i, j) = src.at<cv::Vec3b>(i, j);
       }
     }
