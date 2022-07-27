@@ -5,13 +5,14 @@
 
 #include "normalized_box.h"
 
-class Hand {
+class Hand
+{
   NormalizedBox box;
   cv::Mat mask;
 
-  cv::Mat getHandBox(cv::Mat src, float scale, int padding = 0);
+  cv::Mat getHandBox(cv::Mat src, float &scale, int padding = 0);
 
- public:
+public:
   Hand(NormalizedBox box_);
   NormalizedBox getBox() const;
 
@@ -22,10 +23,10 @@ class Hand {
 
   void showSkin(cv::Mat img);
 
-  friend bool operator<(const Hand& left, const Hand& right);
-  friend bool operator>(const Hand& left, const Hand& right);
-  friend bool operator<=(const Hand& left, const Hand& right);
-  friend bool operator>=(const Hand& left, const Hand& right);
+  friend bool operator<(const Hand &left, const Hand &right);
+  friend bool operator>(const Hand &left, const Hand &right);
+  friend bool operator<=(const Hand &left, const Hand &right);
+  friend bool operator>=(const Hand &left, const Hand &right);
 };
 
-#endif  // HAND_H
+#endif // HAND_H
