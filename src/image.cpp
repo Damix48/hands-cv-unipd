@@ -56,12 +56,11 @@ void Image::generateMasks() {
   detectedMasks = cv::Mat::zeros(size(), CV_8U);
 
   for (Hand& hand : detectedHands) {
-    std::cout << "hand" << std::endl;
     hand.generateMask(data);
 
     cv::Mat roiMasks = detectedMasks(hand.getBox().toRect(detectedMasks.size()));
 
-    hand.getMask().copyTo(roiMasks);
+    hand.getMask().copyTo(roiMasks, hand.getMask());
   }
 }
 
