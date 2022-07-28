@@ -30,12 +30,14 @@ HandDetection [params] path model
          image path
  model
          yolo model path
+ --timing (value:false)
+         show timings
 ```
 
 An example: 
 
 ```
-./HandDetection ./test-dataset/rgb/ best_m_32_2.onnx --boxes=./test-dataset/det/ --masks=./test-dataset/mask --output=./output --display
+./HandDetection ./test-dataset/rgb/ best_m_32_2.onnx --boxes=./test-dataset/det/ --masks=./test-dataset/mask --output=./output --display --timings
 ```
 
 There are 2 required params:
@@ -47,8 +49,9 @@ The optional params are:
 
 - `--boxes`: the path to the txt file or the folder containing the txt file of the ground truth boxes, needed for the calculation of IOU;
 - `--masks`: the path to the ground truth mask or the folder containing the ground truth masks, needed fot the calculation of pixel accuracy;
-- `--output`: the path to the output folder;
-- `--display`: if present the application show the detection and the mask one by one, it's necessary user interaction after the display of the mask to move to the next image.
+- `--output`: the path to the output folder (deafult is `./output`);
+- `--display`: if present the application show the detection and the mask one by one, it's necessary user interaction after the display of the mask to move to the next image;
+- `--timing`: if present the application show the timings of detection and segmentation.
 
 # Detection
 To perform hand detection, the best method, among the tested ones, is YOLOv5.
