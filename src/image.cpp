@@ -55,7 +55,7 @@ void Image::addGroundTruthHand(Hand hand) {
 void Image::generateMasks() {
   detectedMasks = cv::Mat::zeros(size(), CV_8U);
 
-  for (Hand& hand : detectedHands) {
+  for (Hand &hand : detectedHands) {
     hand.generateMask(data);
 
     cv::Mat roiMasks = detectedMasks(hand.getBox().toRect(detectedMasks.size()));
@@ -69,29 +69,21 @@ cv::Mat Image::getMasks() const {
 }
 
 cv::Mat Image::getOverlayMasks() const {
+  cv::Mat result1;
+  data.copyTo(result1);
   cv::Mat result;
-  data.copyTo(result);
+  cv::cvtColor(result1, result, cv::COLOR_BGR2BGRA);
+  int a = 0.7;
+  std::vector<cv::Scalar> colors = {cv::Scalar(77, 62, 200, a), cv::Scalar(255, 138, 0, a), cv::Scalar(255, 82, 173, a), cv::Scalar(121, 164, 0, a)};
 
   for (int i = 0; i < detectedHands.size(); ++i) {
-    const Hand& hand = detectedHands[i];
-    int hue = ((float)255 / detectedHands.size()) * i;
-    cv::Mat mask = cv::Mat::zeros(hand.getMask().size(), CV_8UC3);
+    const Hand &hand = detectedHands[i];
+    cv::Mat mask = cv::Mat(hand.getMask().size(), CV_8UC4, cv::Scalar(0, 0, 0, 0));
 
-    cv::Mat colorHLS = cv::Mat(1, 1, CV_8UC3, cv::Scalar(hue, 125, 125));
-    cv::Mat color;
-    cv::cvtColor(colorHLS, color, cv::COLOR_HLS2BGR_FULL);
-
-    mask.setTo(cv::Scalar(std::rand() % 255, std::rand() % 255, std::rand() % 255), hand.getMask());
-
-    // cv::imshow("CIAO", hand.getMask());
-    // cv::imshow("CIAO2", mask);
-    // cv::waitKey(0);
+    mask.setTo(colors[i % 4], hand.getMask());
 
     cv::Mat roiMasks = result(hand.getBox().toRect(result.size()));
-    cv::addWeighted(roiMasks, 0.5, mask, 0.8, 0, roiMasks);
-    // roiMasks = roiMasks + mask;
-
-    // roiMasks.setTo(cv::Scalar(255, 255, 0), hand.getMask());
+    cv::add(roiMasks, mask, roiMasks);
   }
 
   return result;

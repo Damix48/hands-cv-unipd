@@ -71,8 +71,8 @@ int main(int argc, const char **argv) {
     std::cout << "Detection = " << std::chrono::duration_cast<std::chrono::milliseconds>(endDetection - beginDetection).count() << "[ms]" << std::endl;
 
     if (display) {
-      cv::imshow("prova" + std::to_string(i), img.getDetected());
-      cv::waitKey(10);
+      cv::imshow("Detection", img.getDetected());
+      cv::waitKey(1);
     }
 
     std::chrono::steady_clock::time_point beginSegmentation = std::chrono::steady_clock::now();
@@ -84,7 +84,7 @@ int main(int argc, const char **argv) {
     Printer::print(img);
 
     if (display) {
-      cv::imshow("mask" + std::to_string(i), img.getMasks());
+      cv::imshow("Segmentation", img.getOverlayMasks());
       cv::waitKey(0);
     }
 
