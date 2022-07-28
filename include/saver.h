@@ -1,13 +1,13 @@
 #ifndef SAVER_H
 #define SAVER_H
 
-#include <filesystem>
+#include <string>
 #include <vector>
 
 #include "image.h"
 
 class Saver {
-  std::filesystem::path outputPath;
+  std::string outputPath;
 
   // void saveImages(std::string path, std::vector<Image> images);
 

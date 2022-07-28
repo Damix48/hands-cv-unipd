@@ -1,8 +1,6 @@
 #include "loader.h"
 
-#include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <opencv2/core/utils/filesystem.hpp>
 #include <stdexcept>
 #include <string>
@@ -12,47 +10,39 @@
 #include "image.h"
 #include "normalized_box.h"
 
-std::vector<Image> Loader::loadImages(std::filesystem::path path_) {
-  if (!std::filesystem::exists(path_)) {
-    throw std::invalid_argument("The path specified (" + path_.string() + ") don't exists");
+std::vector<Image> Loader::loadImages(std::string path_) {
+  if (!cv::utils::fs::exists(path_)) {
+    throw std::invalid_argument("The path specified (" + path_ + ") don't exists");
   }
 
   std::vector<std::string> paths;
 
-  if (std::filesystem::is_directory(path_)) {
-    cv::glob(path_, paths);
-  } else {
-    paths.push_back(path_);
-  }
+  cv::glob(path_, paths);
 
   std::vector<Image> images;
 
-  for (std::filesystem::path path : paths) {
+  for (std::string path : paths) {
     images.push_back(Image(path));
   }
 
   return images;
 }
 
-void Loader::loadBoxes(std::filesystem::path path_, std::vector<Image>& images) {
-  if (!std::filesystem::exists(path_)) {
-    throw std::invalid_argument("The path specified (" + path_.string() + ") don't exists");
+void Loader::loadBoxes(std::string path_, std::vector<Image>& images) {
+  if (!cv::utils::fs::exists(path_)) {
+    throw std::invalid_argument("The path specified (" + path_ + ") don't exists");
   }
 
   std::vector<std::string> paths;
 
-  if (std::filesystem::is_directory(path_)) {
-    cv::glob(path_, paths);
-  } else {
-    paths.push_back(path_);
-  }
+  cv::glob(path_, paths);
 
   if (paths.size() != images.size()) {
     throw std::invalid_argument("The number of boxes files (" + std::to_string(paths.size()) + ") is different to the number of images (" + std::to_string(images.size()) + ")");
   }
 
   for (int i = 0; i < paths.size(); ++i) {
-    std::filesystem::path path = paths[i];
+    std::string path = paths[i];
     Image& image = images[i];
 
     std::vector<Hand> hands_;
@@ -78,25 +68,21 @@ void Loader::loadBoxes(std::filesystem::path path_, std::vector<Image>& images) 
   }
 }
 
-void Loader::loadMasks(std::filesystem::path path_, std::vector<Image>& images) {
-  if (!std::filesystem::exists(path_)) {
-    throw std::invalid_argument("The path specified (" + path_.string() + ") don't exists");
+void Loader::loadMasks(std::string path_, std::vector<Image>& images) {
+  if (!cv::utils::fs::exists(path_)) {
+    throw std::invalid_argument("The path specified (" + path_ + ") don't exists");
   }
 
   std::vector<std::string> paths;
 
-  if (std::filesystem::is_directory(path_)) {
-    cv::glob(path_, paths);
-  } else {
-    paths.push_back(path_);
-  }
+  cv::glob(path_, paths);
 
   if (paths.size() != images.size()) {
     throw std::invalid_argument("The number of masks files (" + std::to_string(paths.size()) + ") is different to the number of images (" + std::to_string(images.size()) + ")");
   }
 
   for (int i = 0; i < paths.size(); ++i) {
-    std::filesystem::path path = paths[i];
+    std::string path = paths[i];
     Image& image = images[i];
 
     image.setGroundTruthMasks(path);
