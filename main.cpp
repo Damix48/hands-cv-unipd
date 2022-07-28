@@ -19,7 +19,8 @@ int main(int argc, const char **argv) {
       "{boxes          |       | ground-truth bounding boxes path              }"
       "{masks          |       | ground-truth masks path           }"
       "{output         |       | output path          }"
-      "{display        | false | show images during detection and segmentation }";
+      "{display        | false | show images during detection and segmentation }"
+      "{timing         | false | show timings }";
 
   cv::CommandLineParser parser(argc, argv, keys);
 
@@ -35,6 +36,7 @@ int main(int argc, const char **argv) {
   std::string masksPath = parser.get<std::string>("masks");
   std::string outputPath = parser.get<std::string>("output");
   bool display = parser.get<bool>("display");
+  bool timing = parser.get<bool>("timing");
 
   if (path == "" || modelPath == "") {
     parser.printMessage();
@@ -60,15 +62,19 @@ int main(int argc, const char **argv) {
   for (int i = 0; i < images.size(); i++) {
     begin = std::chrono::steady_clock::now();
 
-    std::cout << "From previous = " << std::chrono::duration_cast<std::chrono::milliseconds>(begin - end).count() << "[ms]" << std::endl;
-
     Image &img = images[i];
 
-    std::chrono::steady_clock::time_point beginDetection = std::chrono::steady_clock::now();
-    detector.detect(img);
-    std::chrono::steady_clock::time_point endDetection = std::chrono::steady_clock::now();
+    std::cout << "Image: " << img.getPath() << std::endl;
 
-    std::cout << "Detection = " << std::chrono::duration_cast<std::chrono::milliseconds>(endDetection - beginDetection).count() << "[ms]" << std::endl;
+    std::chrono::steady_clock::time_point beginDetection = std::chrono::steady_clock::now();
+
+    std::cout << "Performing detection, please wait..." << std::endl;
+    detector.detect(img);
+
+    std::chrono::steady_clock::time_point endDetection = std::chrono::steady_clock::now();
+    if (timing) {
+      std::cout << "Detection = " << std::chrono::duration_cast<std::chrono::milliseconds>(endDetection - beginDetection).count() << "ms" << std::endl;
+    }
 
     if (display) {
       cv::imshow("Detection", img.getDetected());
@@ -76,21 +82,31 @@ int main(int argc, const char **argv) {
     }
 
     std::chrono::steady_clock::time_point beginSegmentation = std::chrono::steady_clock::now();
-    img.generateMasks();
-    std::chrono::steady_clock::time_point endSegmentation = std::chrono::steady_clock::now();
 
-    std::cout << "Segmentation = " << std::chrono::duration_cast<std::chrono::milliseconds>(endSegmentation - beginSegmentation).count() << "[ms]" << std::endl;
+    std::cout << "Performing segmentation, please wait..." << std::endl;
+    img.generateMasks();
+
+    std::chrono::steady_clock::time_point endSegmentation = std::chrono::steady_clock::now();
+    if (timing) {
+      std::cout << "Segmentation = " << std::chrono::duration_cast<std::chrono::milliseconds>(endSegmentation - beginSegmentation).count() << "ms" << std::endl;
+    }
+
+    end = std::chrono::steady_clock::now();
+    if (timing) {
+      std::cout << "Total = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl
+                << std::endl;
+    }
 
     Printer::print(img);
 
     if (display) {
       cv::imshow("Segmentation", img.getOverlayMasks());
+      std::cout << "Press any key to show the next image..." << std::endl
+                << std::endl
+                << std::endl;
+
       cv::waitKey(0);
     }
-
-    end = std::chrono::steady_clock::now();
-    std::cout << "Total = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl
-              << std::endl;
   }
 
   saver.save(images);
