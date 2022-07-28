@@ -105,7 +105,7 @@ The OpenCV implementation[^grabcut-opencv] is used:
 - the algorithm is automatically initialized with a rectangular which corresponds to the bounding box found at the detection step;
 - the input image is not the full-size original one, but a new image composed by the content of the bounding box plus a border of two pixels on each side. The additional border is necessary to initialize the background, which can not be empty according to this implementation.
 
-  Moreover, each input image is scaled by a factor of 1.5 (within a maximum size). Some trials were made: with original and with fixed sizes in width or/and height. This choice seems to be the right trade-off between the quality of the results and the computational time. With a scale factor of 2 the results were more precise but the algorithm becomes much slower. 
+  Moreover, each input image is scaled by a factor of 1.5 (within a maximum size). Some trials were made: with original and with fixed sizes in width or/and height. This choice seems to be the right trade-off between the quality of the results and the computational time.
 - the number of iterations is 10. Beyond this number, results do not substantially change and the algorithm becomes much slower. 
 
 The result of GrabCut is processed with the opening morphological operation to separate weakly connected component and then very small connected components are discharged. 
@@ -464,6 +464,7 @@ Summary of the results metrics:
 | Pixel accuracy | 0.9832296 |
 | IOU | 0.8541382 |
 
+About the segmentation, the hardest task is removing the cards, because of the colors similarity. Some hands have a quite rough segmentation. The precision can be improved by increasing the scale factor before performing GrabCut (for example there is a good improving using a factor of 2), but one has to take into account that the computation time becomes longer.
 
 # Work organization
 
