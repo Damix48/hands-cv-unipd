@@ -16,7 +16,7 @@ YoloDetector::YoloDetector(std::string modelPath, int inputSize_) {
   outputLayerNames = model.getUnconnectedOutLayersNames();
 }
 
-void YoloDetector::detect(Image& img) {
+void YoloDetector::detect(Image &img) {
   cv::Mat blob = img.getImageBlob(inputSize);
 
   model.setInput(blob);
@@ -46,8 +46,7 @@ void YoloDetector::detect(Image& img) {
       scores.push_back(score);
 
       normalizedBoxes.push_back(box);
-
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
       // std::cerr << e.what() << '\n';
 
       NormalizedBox box = NormalizedBox(0, 0, 0, 0);
@@ -61,7 +60,7 @@ void YoloDetector::detect(Image& img) {
     indices.push_back(i);
   }
 
-  cv::dnn::NMSBoxes(boxes, scores, 0.2, 0.15, indices);
+  cv::dnn::NMSBoxes(boxes, scores, 0.3, 0.4, indices);
 
   for (int index : indices) {
     Hand hand(normalizedBoxes[index]);

@@ -9,16 +9,21 @@ class Hand {
   NormalizedBox box;
   cv::Mat mask;
 
+  cv::Mat getHandBox(cv::Mat src, float &scale, int padding = 0);
+
  public:
   Hand(NormalizedBox box_);
   NormalizedBox getBox() const;
 
   float computeBoxIOU(Hand hand, cv::Size size);
 
-  friend bool operator<(const Hand& left, const Hand& right);
-  friend bool operator>(const Hand& left, const Hand& right);
-  friend bool operator<=(const Hand& left, const Hand& right);
-  friend bool operator>=(const Hand& left, const Hand& right);
+  void generateMask(cv::Mat src);
+  cv::Mat getMask() const;
+
+  friend bool operator<(const Hand &left, const Hand &right);
+  friend bool operator>(const Hand &left, const Hand &right);
+  friend bool operator<=(const Hand &left, const Hand &right);
+  friend bool operator>=(const Hand &left, const Hand &right);
 };
 
 #endif  // HAND_H
