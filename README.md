@@ -86,11 +86,11 @@ Transfer learning is a technique by which the structure or knowledge derived fro
 
 YOLOv5 has a tool for exporting the models in several different formats. The model is exported in the ONNX format and loaded in OpenCV with the function `cv::dnn::readNetFromONNX()`.
 
-[Idea and implementation by Zanardo Damiano]
+*[Idea and implementation by Zanardo Damiano]*
 
 ## Other tested approaches for detection
 
-For the detection task, the OpenCV implementation of Cascade Classifier with Haar features was also tried. The number of positive samples was 3000 while the number of negative samples was 6000. The positive samples were taken uniformly from the two datasets provided (EgoHands and HandsOverFace).  The negative samples consisted in the positive samples but the pixels corresponding to hands were set to 0. The training process took more than 72 hours and eventually there were still a lot of false positives, around 50%. [Idea and implementation by Zaccaria Valentina]
+For the detection task, the OpenCV implementation of Cascade Classifier with Haar features was also tried. The number of positive samples was 3000 while the number of negative samples was 6000. The positive samples were taken uniformly from the two datasets provided (EgoHands and HandsOverFace).  The negative samples consisted in the positive samples but the pixels corresponding to hands were set to 0. The training process took more than 72 hours and eventually there were still a lot of false positives, around 50%. *[Idea and implementation by Zaccaria Valentina]*
 
 # Segmentation
 To perform hand segmentation, the best method among the tested ones, is the sequence of GrabCut, SLIC Superpixel clustering and segmentation by thresholding. 
@@ -114,16 +114,16 @@ Since the thresholds are absolute values, this step is meaningful only on color 
 
 To reduce the variability of colors, a SLIC Superpixel segmentation is performed before thresholding. The color of each superpixel is the mean of the colors of pixels that compose it. 
 
-[Idea and implementation by Zaccaria Valentina]
+*[Idea and implementation by Zaccaria Valentina]*
 
 ## Other tested approaches for segmentation 
 
 All the tested methods are performed on the reduced image inside the detected bounding box. 
 
-- SLIC Superpixel segmentation before than GrabCut, to reduce the computational effort required by the latter [Idea and implementation by Zaccaria Valentina];
-- GrabCut, SLIC Superpixel segmentation and region growing with predicate based on 8-connectivity and thresholds on pixel intensities in the HSV color-space [Idea and implementation by Zaccaria Valentina];
-- Region growing alone with the same predicate of the previous point [Idea and implementation by Capraro Giacomo];
-- Scale Space Canny edge detection with automatic thresholds[^canny] to keep detailed but persistent edges, in order to isolated connected component and keep only the largest one (which in principle should have been the one corresponding to the hand) [Idea and implementation by Zaccaria Valentina].
+- SLIC Superpixel segmentation before than GrabCut, to reduce the computational effort required by the latter **[Idea and implementation by Zaccaria Valentina]**;
+- GrabCut, SLIC Superpixel segmentation and region growing with predicate based on 8-connectivity and thresholds on pixel intensities in the HSV color-space *[Idea and implementation by Zaccaria Valentina]*;
+- Region growing alone with the same predicate of the previous point *[Idea and implementation by Capraro Giacomo]*;
+- Scale Space Canny edge detection with automatic thresholds[^canny] to keep detailed but persistent edges, in order to isolated connected component and keep only the largest one (which in principle should have been the one corresponding to the hand) *[Idea and implementation by Zaccaria Valentina]*.
 
 In all these cases results are poorer. 
 
@@ -140,8 +140,8 @@ In all these cases results are poorer.
   - Gaussian of size 7x7
   - Median of size 3x3
 
-  The dimension of the features vector drastically increases as the number of training samples does. The training process becomes extremely slow. The maximum number of training samples we were able to use was 200 (chosen randomly and uniformly). In all the cases, the results were meaningless. [Idea and implementation by Zaccaria Valentina and Zanardo Damiano].
-- In the first place, we have tried Mask R-CNN to perform both tasks, which is the state of the art in term of image segmentation. We discharge this idea at the very beginning because not compliant with the project rules, even if the results were very promising [Idea and implementation by Zanardo Damiano]. 
+  The dimension of the features vector drastically increases as the number of training samples does. The training process becomes extremely slow. The maximum number of training samples we were able to use was 200 (chosen randomly and uniformly). In all the cases, the results were meaningless. *[Idea and implementation by Zaccaria Valentina and Zanardo Damiano]*.
+- In the first place, we have tried Mask R-CNN to perform both tasks, which is the state of the art in term of image segmentation. We discharge this idea at the very beginning because not compliant with the project rules, even if the results were very promising *[Idea and implementation by Zanardo Damiano]*. 
 
 # Results
 
