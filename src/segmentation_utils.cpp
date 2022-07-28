@@ -120,6 +120,7 @@ cv::Mat segmentation::skinThreshold(cv::Mat src) {
   // std::vector<cv::Mat> YCrCbchannels;
   // cv::cvtColor(src, srcYCrCb, cv::COLOR_BGR2YCrCb);
   // cv::split(srcYCrCb, YCrCbchannels);
+  
 
   // cv::Mat srcNormRGB;
   // cv::cvtColor(src, srcNormRGB, cv::COLOR_BGR2RGB);
@@ -131,7 +132,7 @@ cv::Mat segmentation::skinThreshold(cv::Mat src) {
   for (int i = 0; i < src.rows; i++) {
     {
       for (int j = 0; j < src.cols; j++) {
-        if (HSVchannels[0].at<uchar>(i, j) <= 20 || HSVchannels[0].at<uchar>(i, j) >= 120)  //((normRGBChannels[0].at<float>(i, j) / normRGBChannels[1].at<float>(i, j)) >= 1 && ((HSVchannels[0].at<uchar>(i, j) <= 20 || HSVchannels[0].at<uchar>(i, j) >= 120) && (YCrCbchannels[1].at<uchar>(i, j) >= 128 && YCrCbchannels[1].at<uchar>(i, j) <= 173) && (YCrCbchannels[2].at<uchar>(i, j) >= 77 && YCrCbchannels[2].at<uchar>(i, j) <= 132)))
+        if (HSVchannels[0].at<uchar>(i, j) <= 21 || HSVchannels[0].at<uchar>(i, j) >= 120) //((normRGBChannels[0].at<float>(i, j) / normRGBChannels[1].at<float>(i, j)) >= 1 && ((HSVchannels[0].at<uchar>(i, j) <= 20 || HSVchannels[0].at<uchar>(i, j) >= 120) && (YCrCbchannels[1].at<uchar>(i, j) >= 128 && YCrCbchannels[1].at<uchar>(i, j) <= 173) && (YCrCbchannels[2].at<uchar>(i, j) >= 77 && YCrCbchannels[2].at<uchar>(i, j) <= 132)))
         {
           dst.at<uchar>(i, j) = 255;
         }
