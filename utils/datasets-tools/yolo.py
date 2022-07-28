@@ -133,12 +133,21 @@ if __name__ == "__main__":
       "221"  # GIF
   ]
 
-  dataset.load_egohands(egohands_path, skip_images=egohands_skip)
-  dataset.load_hand_over_face(
-      hand_over_faces_path, skip_images=hand_over_face_skip)
-  dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
-  dataset.load_hof_sakher(hand_over_faces_sakher_path)
-  dataset.load_background(background_path, retain=0.2)
+  if(egohands_path != None):
+    dataset.load_egohands(egohands_path, skip_images=egohands_skip)
+
+  if(hand_over_faces_path != None):
+    dataset.load_hand_over_face(
+        hand_over_faces_path, skip_images=hand_over_face_skip)
+
+  if(gtea_gaze_plus_path != None):
+    dataset.load_gtea_gaze_plus(gtea_gaze_plus_path)
+
+  if(hand_over_faces_sakher_path != None):
+    dataset.load_hof_sakher(hand_over_faces_sakher_path)
+
+  if(background_path != None):
+    dataset.load_background(background_path, retain=0.2)
 
   create_yolo_dataset(dataset, output_path,
                       black_white_ratio=black_white_ratio)
