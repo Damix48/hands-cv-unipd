@@ -123,7 +123,7 @@ To reduce the variability of colors, a SLIC Superpixel segmentation is performed
 
 All the tested methods are performed on the reduced image inside the detected bounding box. 
 
-- SLIC Superpixel segmentation before than GrabCut, to reduce the computational effort required by the latter **[Idea and implementation by Zaccaria Valentina]**;
+- SLIC Superpixel segmentation before than GrabCut, to reduce the computational effort required by the latter *[Idea and implementation by Zaccaria Valentina]*;
 - GrabCut, SLIC Superpixel segmentation and region growing with predicate based on 8-connectivity and thresholds on pixel intensities in the HSV color-space *[Idea and implementation by Zaccaria Valentina]*;
 - Region growing alone with the same predicate of the previous point *[Idea and implementation by Capraro Giacomo]*;
 - Scale Space Canny edge detection with automatic thresholds[^canny], to keep detailed but persistent edges and on different channels of different color-spaces, such as HSV, to neglect the illumination component. The aim was to isolate connected components and keep only the largest one (which in principle should have been the one corresponding to the hand). *[Idea and implementation by Zaccaria Valentina]*.
