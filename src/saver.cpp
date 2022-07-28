@@ -17,6 +17,8 @@ void Saver::save(const std::vector<Image>& images) {
   detectionPath.append("detected");
   std::filesystem::path maskPath = outputPath;
   maskPath.append("masks");
+  std::filesystem::path overlayPath = outputPath;
+  overlayPath.append("overlay");
   std::filesystem::path boxPath = outputPath;
   boxPath.append("boxes");
 
@@ -35,6 +37,10 @@ void Saver::save(const std::vector<Image>& images) {
     std::filesystem::path maskOutput = maskPath;
     maskOutput.append(stem + ".png");
     cv::imwrite(maskOutput, images[i].getMasks());
+
+    std::filesystem::path overlayOutput = overlayPath;
+    overlayOutput.append(stem + ".jpg");
+    cv::imwrite(overlayOutput, images[i].getOverlayMasks());
 
     std::filesystem::path boxOutput = boxPath;
     boxOutput.append(stem + ".txt");
