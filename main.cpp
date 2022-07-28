@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/highgui.hpp>
@@ -12,7 +13,7 @@
 
 int main(int argc, const char **argv) {
   const std::string keys =
-      "{help h usage ? |       | print this message   }"
+      "{help h usage ? |       | print help message   }"
       "{@path          |       | image path           }"
       "{@model         |       | yolo model path                               }"
       "{boxes          |       | ground-truth bounding boxes path              }"
@@ -35,6 +36,11 @@ int main(int argc, const char **argv) {
   std::string outputPath = parser.get<std::string>("output");
   bool display = parser.get<bool>("display");
 
+  if (path == "" || modelPath == "") {
+    parser.printMessage();
+    return EXIT_FAILURE;
+  }
+
   YoloDetector detector(modelPath, 640);
   Saver saver(outputPath);
 
@@ -48,22 +54,43 @@ int main(int argc, const char **argv) {
     Loader::loadMasks(masksPath, images);
   }
 
+  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
   for (int i = 0; i < images.size(); i++) {
+    begin = std::chrono::steady_clock::now();
+
+    std::cout << "From previous = " << std::chrono::duration_cast<std::chrono::milliseconds>(begin - end).count() << "[ms]" << std::endl;
+
     Image &img = images[i];
 
+    std::chrono::steady_clock::time_point beginDetection = std::chrono::steady_clock::now();
     detector.detect(img);
+    std::chrono::steady_clock::time_point endDetection = std::chrono::steady_clock::now();
+
+    std::cout << "Detection = " << std::chrono::duration_cast<std::chrono::milliseconds>(endDetection - beginDetection).count() << "[ms]" << std::endl;
 
     if (display) {
       cv::imshow("prova" + std::to_string(i), img.getDetected());
       cv::waitKey(10);
     }
 
+    std::chrono::steady_clock::time_point beginSegmentation = std::chrono::steady_clock::now();
     img.generateMasks();
+    std::chrono::steady_clock::time_point endSegmentation = std::chrono::steady_clock::now();
+
+    std::cout << "Segmentation = " << std::chrono::duration_cast<std::chrono::milliseconds>(endSegmentation - beginSegmentation).count() << "[ms]" << std::endl;
 
     Printer::print(img);
-    cv::waitKey(0);
 
-    cv::imshow("mask" + std::to_string(i), img.getMasks());
+    if (display) {
+      cv::imshow("mask" + std::to_string(i), img.getMasks());
+      cv::waitKey(0);
+    }
+
+    end = std::chrono::steady_clock::now();
+    std::cout << "Total = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl
+              << std::endl;
   }
 
   saver.save(images);
