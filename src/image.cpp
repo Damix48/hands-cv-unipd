@@ -12,15 +12,20 @@
 
 #include "hand.h"
 
-Image::Image(std::string path_) : path(path_) {
+Image::Image(std::string path_) : path(path_)
+{
   data = cv::imread(path, cv::IMREAD_UNCHANGED);
 }
 
-const cv::Mat Image::getImageBlob(cv::Size size) const {
+const cv::Mat Image::getImageBlob(cv::Size size) const
+{
   cv::Mat bgr;
-  if (data.channels() == 1) {
+  if (data.channels() == 1)
+  {
     cv::cvtColor(data, bgr, cv::COLOR_GRAY2BGR);
-  } else {
+  }
+  else
+  {
     data.copyTo(bgr);
   }
 
@@ -33,29 +38,35 @@ const cv::Mat Image::getImageBlob(cv::Size size) const {
   return blob;
 }
 
-void Image::addDetectedHand(Hand hand) {
+void Image::addDetectedHand(Hand hand)
+{
   detectedHands.push_back(hand);
 }
 
-cv::Mat Image::getDetected() const {
+cv::Mat Image::getDetected() const
+{
   cv::Mat temp;
   data.copyTo(temp);
 
-  for (Hand hand : detectedHands) {
+  for (Hand hand : detectedHands)
+  {
     cv::rectangle(temp, hand.getBox().toRect(data.size()), cv::Scalar(255, 0, 0));
   }
 
   return temp;
 }
 
-void Image::addGroundTruthHand(Hand hand) {
+void Image::addGroundTruthHand(Hand hand)
+{
   groundTruthHands.push_back(hand);
 }
 
-void Image::generateMasks() {
+void Image::generateMasks()
+{
   detectedMasks = cv::Mat::zeros(size(), CV_8U);
 
-  for (Hand& hand : detectedHands) {
+  for (Hand &hand : detectedHands)
+  {
     hand.generateMask(data);
 
     cv::Mat roiMasks = detectedMasks(hand.getBox().toRect(detectedMasks.size()));
@@ -64,56 +75,57 @@ void Image::generateMasks() {
   }
 }
 
-cv::Mat Image::getMasks() const {
+cv::Mat Image::getMasks() const
+{
   return detectedMasks;
 }
 
-cv::Mat Image::getOverlayMasks() const {
+cv::Mat Image::getOverlayMasks() const
+{
+  cv::Mat result1;
+  data.copyTo(result1);
   cv::Mat result;
-  data.copyTo(result);
+  cv::cvtColor(result1, result, cv::COLOR_BGR2BGRA);
+  int a = 0.7;
+  std::vector<cv::Scalar> colors = {cv::Scalar(77, 62, 200, a), cv::Scalar(255, 138, 0, a), cv::Scalar(255, 82, 173, a), cv::Scalar(121, 164, 0, a)};
 
-  for (int i = 0; i < detectedHands.size(); ++i) {
-    const Hand& hand = detectedHands[i];
-    int hue = ((float)255 / detectedHands.size()) * i;
-    cv::Mat mask = cv::Mat::zeros(hand.getMask().size(), CV_8UC3);
+  for (int i = 0; i < detectedHands.size(); ++i)
+  {
+    const Hand &hand = detectedHands[i];
+    cv::Mat mask = cv::Mat(hand.getMask().size(), CV_8UC4, cv::Scalar(0, 0, 0, 0));
 
-    cv::Mat colorHLS = cv::Mat(1, 1, CV_8UC3, cv::Scalar(hue, 125, 125));
-    cv::Mat color;
-    cv::cvtColor(colorHLS, color, cv::COLOR_HLS2BGR_FULL);
-
-    mask.setTo(cv::Scalar(std::rand() % 255, std::rand() % 255, std::rand() % 255), hand.getMask());
-
-    // cv::imshow("CIAO", hand.getMask());
-    // cv::imshow("CIAO2", mask);
-    // cv::waitKey(0);
+    mask.setTo(colors[i % 4], hand.getMask());
 
     cv::Mat roiMasks = result(hand.getBox().toRect(result.size()));
-    cv::addWeighted(roiMasks, 0.5, mask, 0.8, 0, roiMasks);
-    // roiMasks = roiMasks + mask;
-
-    // roiMasks.setTo(cv::Scalar(255, 255, 0), hand.getMask());
+    cv::add(roiMasks, mask, roiMasks);
+    
   }
 
   return result;
 }
 
-void Image::setGroundTruthMasks(cv::Mat mask) {
+void Image::setGroundTruthMasks(cv::Mat mask)
+{
   mask.copyTo(groundTruthMasks);
 }
 
-void Image::setGroundTruthMasks(std::string path) {
+void Image::setGroundTruthMasks(std::string path)
+{
   groundTruthMasks = cv::imread(path, cv::IMREAD_GRAYSCALE);
 }
 
-std::vector<Hand> Image::getHands() const {
+std::vector<Hand> Image::getHands() const
+{
   return detectedHands;
 }
 
-std::string Image::getPath() const {
+std::string Image::getPath() const
+{
   return path;
 }
 
-std::vector<float> Image::getIOUs() const {
+std::vector<float> Image::getIOUs() const
+{
   std::vector<float> IOCs;
 
   std::vector<Hand> detected = detectedHands;
@@ -124,18 +136,21 @@ std::vector<float> Image::getIOUs() const {
 
   int size_ = detected.size();
 
-  if (detected.size() > groundTruth.size()) {
+  if (detected.size() > groundTruth.size())
+  {
     size_ = groundTruth.size();
   }
 
-  for (int i = 0; i < size_; ++i) {
+  for (int i = 0; i < size_; ++i)
+  {
     IOCs.push_back(detected[i].computeBoxIOU(groundTruth[i], size()));
   }
 
   return IOCs;
 }
 
-float Image::getMasksAccuracy() const {
+float Image::getMasksAccuracy() const
+{
   int groundTruthPixels = groundTruthMasks.rows * groundTruthMasks.cols;
 
   cv::Mat correctMasks, groundTruthNotMasks, detectedNotMasks, correctNotMasks;
@@ -152,6 +167,7 @@ float Image::getMasksAccuracy() const {
   return ((float)correctMasksPixels + (float)correctNotMasksPixels) / (float)groundTruthPixels;
 }
 
-cv::Size Image::size() const {
+cv::Size Image::size() const
+{
   return data.size();
 }
