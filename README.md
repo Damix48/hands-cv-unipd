@@ -126,7 +126,7 @@ All the tested methods are performed on the reduced image inside the detected bo
 - SLIC Superpixel segmentation before than GrabCut, to reduce the computational effort required by the latter **[Idea and implementation by Zaccaria Valentina]**;
 - GrabCut, SLIC Superpixel segmentation and region growing with predicate based on 8-connectivity and thresholds on pixel intensities in the HSV color-space *[Idea and implementation by Zaccaria Valentina]*;
 - Region growing alone with the same predicate of the previous point *[Idea and implementation by Capraro Giacomo]*;
-- Scale Space Canny edge detection with automatic thresholds[^canny] to keep detailed but persistent edges, in order to isolated connected component and keep only the largest one (which in principle should have been the one corresponding to the hand) *[Idea and implementation by Zaccaria Valentina]*.
+- Scale Space Canny edge detection with automatic thresholds[^canny], to keep detailed but persistent edges and on different channels of different color-spaces, such as HSV, to neglect the illumination component. The aim was to isolate connected components and keep only the largest one (which in principle should have been the one corresponding to the hand). *[Idea and implementation by Zaccaria Valentina]*.
 
 In all these cases results are poorer. 
 
@@ -144,7 +144,7 @@ In all these cases results are poorer.
   - Median of size 3x3
 
   The dimension of the features vector drastically increases as the number of training samples does. The training process becomes extremely slow. The maximum number of training samples we were able to use was 200 (chosen randomly and uniformly). In all the cases, the results were meaningless. *[Idea and implementation by Zaccaria Valentina and Zanardo Damiano]*.
-- In the first place, we have tried Mask R-CNN to perform both tasks, which is the state of the art in term of image segmentation. We discharge this idea at the very beginning because not compliant with the project rules, even if the results were very promising *[Idea and implementation by Zanardo Damiano]*. 
+- In the first place, we have tried Mask R-CNN to perform both tasks, which is the state of the art in term of image segmentation. We discharge this idea at the very beginning because not compliant with the project rules, even if the results were very promising *[Idea and implementation by Zanardo Damiano]*.
 
 # Results
 
